@@ -20,7 +20,7 @@
 ; Ticking and Animation
 (define (tick game) (physics-update game))
 (define (draw game)
-  (place-image CAR (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game))) BACKGROUND))
+  (place-image (text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 12 "red") 50 10 (place-image CAR (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game))) BACKGROUND)))
 
 ; Event Handlers
 (define (keydown game k)

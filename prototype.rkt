@@ -1,5 +1,7 @@
 #lang racket
-(provide (struct-out pos) (struct-out gs))
+(provide (struct-out pos) (struct-out gs) m2p p2m)
 
-(struct pos (x y))
+(struct pos (x y)) ; Position Structure
 (struct gs (camera player velocity accelerator) #:mutable) ; Game State
+(define (m2p m) (* m 20)) ; meters to pixels
+(define (p2m p) (/ p 20)) ; pixels to meters
