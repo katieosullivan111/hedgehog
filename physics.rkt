@@ -30,4 +30,21 @@
   (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (+ (pos-y (gs-velocity game)) (m2p (/ (netforce (p2m (pos-y (gs-velocity game))) (gs-accelerator game)) CAR.MASS fps)))))
   ; Update Player Position
   (set-gs-player! game (pos (+ (pos-x (gs-player game)) (pos-x (gs-velocity game))) (- (pos-y (gs-player game)) (/ (pos-y (gs-velocity game)) fps))))
+    ; Collisions
+  (when
+    (or
+        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-truck1 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-truck1 game))) 2))) 10)
+        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-truck2 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-truck2 game))) 2))) 10)
+        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-truck3 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-truck3 game))) 2))) 10)
+        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-car1 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-car1 game))) 2))) 10)
+        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-car2 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-car2 game))) 2))) 10)
+        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-car3 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-car3 game))) 2))) 10))
+     (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (pos-x (gs-player game)) (+ (pos-y (gs-player game)) 50))))
+  (if (< (pos-x (gs-player game)) 100)
+      (and (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (+ (pos-x (gs-player game)) 100) (pos-y (gs-player game)))))
+      game)
+  (if (> (pos-x (gs-player game)) 900)
+      (and (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (- (pos-x (gs-player game)) 100) (pos-y (gs-player game)))))
+      game)
   game)
+

@@ -5,22 +5,18 @@
 ; Local Modules
 (require "prototype.rkt")
 (require "physics.rkt")
+(require "animation.rkt")
 
 ; Constants
-(define WIDTH  1000)
-(define HEIGHT  500)
 (define move-size 20)
- 
-(define BACKGROUND  (empty-scene WIDTH HEIGHT)) ; short for empty scene
-(define CAR (rectangle 4 10 "solid" "red"))
 
 ; Initialise Game State
-(define init (gs (pos 0 0) (pos (/ WIDTH 2) (/ HEIGHT 2)) (pos 0 0) 0))
+(define init (gs (pos 0 0) (pos SCENE.HALFWIDTH SCENE.HALFHEIGHT) (pos 0 0) 0 3
+                 (pos 150 400) (pos 100 200) (pos 300 200) (pos 400 300) (pos 340 350) (pos 290 400)))
+
 
 ; Ticking and Animation
-(define (tick game) (physics-update game))
-(define (draw game)
-  (place-image (text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 12 "red") 50 10 (place-image CAR (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game))) BACKGROUND)))
+(define (tick game) (set-gs-camera! (physics-update game) (pos 0 (- (pos-y (gs-player game)) SCENE.HALFHEIGHT))) (NPC-MOVEMENT game) game)
 
 ; Event Handlers
 (define (keydown game k)
@@ -36,5 +32,22 @@
     [(key=? k "s") (set-gs-accelerator! game 0) game]
     [else game]))
 
+
+(define (NPC-MOVEMENT game)
+  (set-gs-truck1! game (pos (pos-x (gs-truck1 game)) (- (pos-y (gs-truck1 game)) 1)))
+  (set-gs-truck2! game (pos (pos-x (gs-truck2 game)) (- (pos-y (gs-truck1 game)) 20)))
+  (set-gs-truck3! game (pos (pos-x (gs-truck3 game)) (- (pos-y (gs-truck1 game)) 30))))
+
+;Termination Clauses
+(define (lives-update game)
+  (set-gs-lives! game 3))
+
+(define (game-over? game)
+   (if (= (gs-lives game) 0)
+       #true
+       #false))
+
+
+
 ; Start the game
-(big-bang init [on-tick tick] [to-draw draw] [on-key keydown] [on-release keyup])
+(big-bang init [on-tick tick] [to-draw draw] [on-key keydown] [on-release keyup] [stop-when game-over?])
