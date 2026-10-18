@@ -9,11 +9,13 @@
 (define CAR.Cd 0.7) ; Co-eff of drag
 (define CAR.AREA 1.7) ; m^2
 (define CAR.MASS 800) ; kg
-(define CAR.TORQUE 150) ; Nm
+(define CAR.TORQUE 250) ; Nm
 (define CAR.WHEELRADIUS 0.3) ; m
-(define CAR.DRIVERATIO 8) ; Total Drive Ratio
+(define CAR.DRIVERATIO 6) ; Total Drive Ratio
 (define CAR.MAXRPM 20000) ; Max RPM
+(define CAR.WHEELBASE 2.7) ; m
 (define CAR.MAXSPEED (/ (* CAR.MAXRPM 2 pi CAR.WHEELRADIUS) (* 60 CAR.DRIVERATIO))) ; m/s
+
 ; Forces
 (define CAR.BRAKEPOWER (* 1.2 g CAR.MASS)) ; N
 (define friction (* mu CAR.MASS g)) ; N
@@ -25,10 +27,44 @@
     (- traction rolling-resistance (drag v))
     (if (> v 0) (- 0 (if (= a -1) CAR.BRAKEPOWER 0) rolling-resistance (drag v)) (* v CAR.MASS fps -1)))) ; N
 
+; Mechanics
+(define steer-max 30) ; Max Steering Angle (degrees)
+(define (steer-omega v) (/ 2 (log (+ (abspos v) 5)))) ; Steering angular velocity (degrees/frame)
+(define (steer-wheel game)
+  (max (- steer-max) ; Keep wheel rotation within physical bounds
+    (min
+      steer-max
+      (round (+ (gs-wheel game)
+      (if (= (gs-steering game) 0)
+          (cond [(> (gs-wheel game) 0) -1] [(< (gs-wheel game) 0) 1] [else 0]) ; Wheel snap-back
+          (* (steer-omega (gs-velocity game)) (gs-steering game)))))))) ; User steer
+
+; tick
 (define (physics-update game)
-  ; Acceleration
-  (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (+ (pos-y (gs-velocity game)) (m2p (/ (netforce (p2m (pos-y (gs-velocity game))) (gs-accelerator game)) CAR.MASS fps)))))
-  ; Update Player Position
-  (set-gs-player! game (pos (+ (pos-x (gs-player game)) (pos-x (gs-velocity game))) (- (pos-y (gs-player game)) (/ (pos-y (gs-velocity game)) fps))))
+  ; Steering & Acceleration
+  (set-gs-wheel! game (steer-wheel game))
+
+  (define speed (abspos (gs-velocity game)))
+  (define newspeed (max 0 (+ speed (m2p (/ (netforce (p2m speed) (gs-accelerator game)) CAR.MASS fps)))))
+
+  (define currentdirection (d2r (posr-r (gs-player game))))
+  (define turn-rate
+    (/ (* (p2m newspeed) (tan (d2r (gs-wheel game))))
+       CAR.WHEELBASE))
+  (define nextdirection (+ currentdirection (/ turn-rate fps)))
+  (define direction (/ (+ currentdirection nextdirection) 2))
+
+  (set-gs-velocity! game
+    (pos (- (* newspeed (sin nextdirection)))
+      (* newspeed (cos nextdirection))))
+
+  ; Update Position
+  (set-gs-player! game
+    (posr
+      (+ (posr-x (gs-player game)) (/ (- (* newspeed (sin direction))) fps))
+      (- (posr-y (gs-player game)) (/ (* newspeed (cos direction)) fps))
+      (r2d nextdirection)))
+  ; Camera update
+  (set-gs-camera! game (pos 0 (- (posr-y (gs-player game)) SCENE.CAMERAHEIGHT)))
   game
 )
