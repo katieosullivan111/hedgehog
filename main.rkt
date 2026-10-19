@@ -5,35 +5,28 @@
 ; Local Modules
 (require "prototype.rkt")
 (require "physics.rkt")
-
-; Constants
-(define WIDTH  1000)
-(define HEIGHT  500)
-(define move-size 20)
- 
-(define BACKGROUND  (empty-scene WIDTH HEIGHT)) ; short for empty scene
-(define CAR (rectangle 4 10 "solid" "red"))
+(require "animation.rkt")
 
 ; Initialise Game State
-(define init (gs (pos 0 0) (pos (/ WIDTH 2) (/ HEIGHT 2)) (pos 0 0) 0))
+(define init (gs (pos 0 0) (posr SCENE.HALFWIDTH SCENE.HALFHEIGHT 0) (pos 0 0) 0 0 0))
 
-; Ticking and Animation
+; Tick Update
 (define (tick game) (physics-update game))
-(define (draw game)
-  (place-image (text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 12 "red") 50 10 (place-image CAR (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game))) BACKGROUND)))
 
 ; Event Handlers
 (define (keydown game k)
-  (cond
-    [(key=? k "w") (set-gs-accelerator! game 1) game]
-    [(key=? k "s") (set-gs-accelerator! game -1) game]
-    [(key=? k "a") (set-gs-player! game (pos (- (pos-x (gs-player game)) move-size) (pos-y (gs-player game)))) game]
-    [(key=? k "d") (set-gs-player! game (pos (+ (pos-x (gs-player game)) move-size) (pos-y (gs-player game)))) game]
+  (case k
+    [("w") (set-gs-accelerator! game 1) game]
+    [("s") (set-gs-accelerator! game -1) game]
+    [("a") (set-gs-steering! game 1) game]
+    [("d") (set-gs-steering! game -1) game]
     [else game]))
 (define (keyup game k)
-  (cond
-    [(key=? k "w") (set-gs-accelerator! game 0) game]
-    [(key=? k "s") (set-gs-accelerator! game 0) game]
+  (case k
+    [("w") (set-gs-accelerator! game 0) game]
+    [("s") (set-gs-accelerator! game 0) game]
+    [("a") (when (equal? (gs-steering game) 1) (set-gs-steering! game 0)) game]
+    [("d") (when (equal? (gs-steering game) -1) (set-gs-steering! game 0)) game]
     [else game]))
 
 ; Start the game
