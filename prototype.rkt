@@ -11,8 +11,8 @@
 ; General
 (struct pos (x y)) ; Position Structure
 (struct posr (x y r)) ; Position Structure with rotation
-(struct gs (camera player velocity accelerator wheel steering) #:mutable) ; Game State
-; <vector> <vector3d> <vector> <int [-1, 1]> <number (degrees)> <int [-1, 1]>
+(struct gs (t fps camera player velocity accelerator wheel steering) #:mutable) ; Game State
+; <number (s)> <number> <vector> <vector3d> <vector> <int [-1, 1]> <number (degrees)> <int [-1, 1]>
 
 ; Unit conversion
 (define (m2p m) (* m 20)) ; meters to pixels
@@ -27,6 +27,7 @@
     (sqrt (+ (sqr (pos-x p)) (sqr (pos-y p)))))
 
 ; Animation
+(define MAXFPS 240)
 (define SCENE.WIDTH  1000)
 (define SCENE.HEIGHT  1000)
 (define SCENE.HALFHEIGHT (/ SCENE.HEIGHT 2))

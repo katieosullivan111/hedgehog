@@ -8,10 +8,17 @@
 (require "animation.rkt")
 
 ; Initialise Game State
-(define init (gs (pos 0 0) (posr SCENE.HALFWIDTH SCENE.HALFHEIGHT 0) (pos 0 0) 0 0 0))
+(define init (gs (/ (current-inexact-milliseconds) 1000) 1 (pos 0 0) (posr SCENE.HALFWIDTH SCENE.HALFHEIGHT 0) (pos 0 0) 0 0 0))
 
 ; Tick Update
-(define (tick game) (physics-update game))
+(define (tick game)
+  (define now (/ (current-inexact-milliseconds) 1000))
+  (define delta (min (- now (gs-t game)) 0.1)) ; delta time between frames, limit to 10 fps
+  (physics-update game delta)
+  (set-gs-t! game now)
+  (set-gs-fps! game (round (/ 1000 (round (* 1000 delta)))))
+  game)
+
 
 ; Event Handlers
 (define (keydown game k)
@@ -30,4 +37,4 @@
     [else game]))
 
 ; Start the game
-(big-bang init [on-tick tick] [to-draw draw] [on-key keydown] [on-release keyup])
+(big-bang init [on-tick tick (/ 1 MAXFPS)] [to-draw draw] [on-key keydown] [on-release keyup])
