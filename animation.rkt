@@ -19,14 +19,16 @@
 (define (draw game)
   (draw-scene
     (list ; Last item in list is on top
-      (rotate (posr-r (gs-player game)) CAR)
+      CAR
       (rotate (* (gs-wheel game) 9) STEERINGWHEEL)
       (text (string-append (number->string (round (* 3.6 (p2m (abspos (gs-velocity game)))))) " km/h") 12 "red") ; Speed text
       (text (string-append (number->string (gs-fps game)) " FPS") 12 "red") ; FPS
+      (text (number->string (gs-wheel game)) 12 "red")
     )
     (list
-      (pos (- (posr-x (gs-player game)) (pos-x (gs-camera game))) (- (posr-y (gs-player game)) (pos-y (gs-camera game)))) ; Car
+      (pos (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game)))) ; Car
       (pos 100 (- SCENE.HEIGHT 100)) ; Steering Wheel
       (pos 50 10) ; Speed text
       (pos 50 30) ; FPS
+      (pos 50 50)
 )))
