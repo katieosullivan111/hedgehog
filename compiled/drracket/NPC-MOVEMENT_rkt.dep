@@ -1,0 +1,1 @@
+("9.3" tarm64osx ("74861613fdb76ec87f0db5a33b9fa9c66e8ddd59" . "357def8ac144abdfbfb5238ea21594e2d8429a06") #"/Users/jackconnolly/Documents/GitHub/hedgehog/prototype.rkt" (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))
