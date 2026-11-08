@@ -1,16 +1,6 @@
 #lang racket
 (require "prototype.rkt")
-(provide give-velocity)
-
-(define (NPC-MOVEMENT x game)
-    (if (empty? x)
-        empty
-(and (set-car-x!  (first x) (car-x (first x))) (set-car-y! (first x) (- (car-y (first x)) (speed game)))
-    (NPC-MOVEMENT (rest x) game))))
-
-;Gives NPCS velocity
-(define (give-velocity game)
-  (NPC-MOVEMENT mega game))
+(provide speed)
  
 
   (define (speed game)

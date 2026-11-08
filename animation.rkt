@@ -39,7 +39,7 @@
 (define (make-more-vehicles x g)
   (if (empty? x)
       (append x x)
-      (if (<= g 50)
+      (if (<= g 150)
           (cons (list-ref vehicles (random 9)) (make-more-vehicles x (+ g 1)))
           empty)))
 
@@ -51,13 +51,13 @@
 (define (nee-naw game)
   (cond
     [(> (pos-y (gs-player game)) -1000)
-  (list-maker-vehicles 5)]
+  (list-maker-vehicles 20)]
     [(and (<= (pos-y (gs-player game)) -1000) (> (pos-y (gs-player game)) -2000))
-  (list-maker-vehicles 10)]
+  (list-maker-vehicles 40)]
     [(and (<= (pos-y (gs-player game)) -2000) (> (pos-y (gs-player game)) -3000))
- (list-maker-vehicles 15)]
+ (list-maker-vehicles 60)]
       [else 
- (list-maker-vehicles 20)]))
+ (list-maker-vehicles 80)]))
   
 
 (define (objects game) (list ; Last item in list is on top

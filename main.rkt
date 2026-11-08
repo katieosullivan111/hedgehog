@@ -9,18 +9,15 @@
 (require "collisions-update.rkt")
 (require "NPC-MOVEMENT.rkt")
 
-
-
 ; Constants
 (define move-size 20)
 
-
 ; Initialise Game State
-(define init  (gs (pos 0 0) (pos SCENE.HALFWIDTH SCENE.HALFHEIGHT) (pos 0 0) 0 3  (pos (+ (random 800) 100) (+ (random 800) 100)) (pos (+ (random 800) 100) (+ (random 800) 100)) empty empty))  
+(define init  (gs (pos 0 0) (pos SCENE.HALFWIDTH SCENE.HALFHEIGHT) (pos 0 0) 0 3  (pos (+ (random 800) 100) (+ (random 800) 100)) (pos (+ (random 800) 100) (+ (random 800) 100)) lane))  
                                                                                                 
 ; Ticking and Animation
-(define (tick game) (set-gs-camera! (physics-update game) (pos 0 (- (pos-y (gs-player game)) SCENE.HALFHEIGHT))) (give-velocity game)
-  (vroom-vroom game) (nee-naw game) (collisions-update game) game)
+(define (tick game) (set-gs-camera! (physics-update game) (pos 0 (- (pos-y (gs-player game)) SCENE.HALFHEIGHT)))
+ (collisions-update game) game)
 
 ; Event Handlers
 (define (keydown game k)
@@ -37,7 +34,6 @@
     [else game]))
 
 ;Termination Clauses
-
 (define (game-over? game)
     (= (gs-lives game) 0))
 
