@@ -3,7 +3,6 @@
 (provide physics-update)
 
 ; Constants
-(define fps 30) ; Frames per second
 (define mu 0.7) ; Co-eff of friction
 (define g 9.8) ; m/s^2
 (define CAR.Cd 0.7) ; Co-eff of drag
@@ -22,49 +21,47 @@
 (define rolling-resistance (* 0.015 CAR.MASS g)) ; N
 (define traction (/ (* CAR.TORQUE CAR.DRIVERATIO) CAR.WHEELRADIUS)) ; N
 (define (drag v) (* 0.5 CAR.Cd CAR.AREA (sqr v))) ; N
-(define (netforce v a)
+(define (netforce v a d) ; velocity accelerator delta
   (if (and (= a 1) (< v CAR.MAXSPEED))
     (- traction rolling-resistance (drag v))
-    (if (> v 0) (- 0 (if (= a -1) CAR.BRAKEPOWER 0) rolling-resistance (drag v)) (* v CAR.MASS fps -1)))) ; N
+    (if (> v 0) (- 0 (if (= a -1) CAR.BRAKEPOWER 0) rolling-resistance (drag v)) (/ (* v CAR.MASS -1) d)))) ; N
 
 ; Mechanics
 (define steer-max 30) ; Max Steering Angle (degrees)
-(define (steer-omega v) (/ 2 (log (+ (abspos v) 5)))) ; Steering angular velocity (degrees/frame)
-(define (steer-wheel game)
-  (max (- steer-max) ; Keep wheel rotation within physical bounds
-    (min
-      steer-max
-      (round (+ (gs-wheel game)
-      (if (= (gs-steering game) 0)
-          (cond [(> (gs-wheel game) 0) -1] [(< (gs-wheel game) 0) 1] [else 0]) ; Wheel snap-back
-          (* (steer-omega (gs-velocity game)) (gs-steering game)))))))) ; User steer
+(define (steer-omega d) (* 50 d)) ; Steering angular velocity (degrees/second)
+(define (steer-wheel game delta)
+  (local [
+    (define a
+      (max
+        (- steer-max) ; Keep wheel rotation within physical bounds
+        (min
+          steer-max
+          (+
+            (gs-wheel game)
+            (* (steer-omega delta)
+              (if (= (gs-steering game) 0)
+                  (cond [(> (gs-wheel game) 0) -1] [(< (gs-wheel game) 0) 1] [else 0]) ; Wheel snap-back
+                  (gs-steering game))))))) ; User steer
+    ]
+    (if (and (= (gs-steering game) 0) (< (abs a) 1)) 0 a)))
 
 ; tick
-(define (physics-update game)
-  ; Steering & Acceleration
-  (set-gs-wheel! game (steer-wheel game))
+(define (physics-update game delta)
+  (set-gs-wheel! game (steer-wheel game delta)) ; Steer update
 
-  (define speed (abspos (gs-velocity game)))
-  (define newspeed (max 0 (+ speed (m2p (/ (netforce (p2m speed) (gs-accelerator game)) CAR.MASS fps)))))
+  (local [
+    (define xspeed (m2p (gs-wheel game)))
+    (define yspeed (pos-y (gs-velocity game)))
+    (define newyspeed (max 0 (+ yspeed (m2p (* (/ (netforce (p2m yspeed) (gs-accelerator game) delta) CAR.MASS) delta)))))]
+    (set-gs-velocity! game (pos xspeed newyspeed))
 
-  (define currentdirection (d2r (posr-r (gs-player game))))
-  (define turn-rate
-    (/ (* (p2m newspeed) (tan (d2r (gs-wheel game))))
-       CAR.WHEELBASE))
-  (define nextdirection (+ currentdirection (/ turn-rate fps)))
-  (define direction (/ (+ currentdirection nextdirection) 2))
+    ; Update Position
+    (set-gs-player! game
+    (pos
+      (+ (pos-x (gs-player game)) (* xspeed delta))
+      (- (pos-y (gs-player game)) (* newyspeed delta)))))
 
-  (set-gs-velocity! game
-    (pos (- (* newspeed (sin nextdirection)))
-      (* newspeed (cos nextdirection))))
-
-  ; Update Position
-  (set-gs-player! game
-    (posr
-      (+ (posr-x (gs-player game)) (/ (- (* newspeed (sin direction))) fps))
-      (- (posr-y (gs-player game)) (/ (* newspeed (cos direction)) fps))
-      (r2d nextdirection)))
   ; Camera update
-  (set-gs-camera! game (pos 0 (- (posr-y (gs-player game)) SCENE.CAMERAHEIGHT)))
+  (set-gs-camera! game (pos 0 (- (pos-y (gs-player game)) SCENE.CAMERAHEIGHT)))
   game
 )
