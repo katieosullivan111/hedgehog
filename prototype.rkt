@@ -1,6 +1,7 @@
 #lang racket
 (provide (all-defined-out))
 
+; General
 (struct pos (x y)) ; Position Structure
 (struct gs (t fps camera player velocity accelerator wheel steering lives truck1 truck2 truck3 car1 car2 car3 stripes) #:mutable) ; Game State
 
