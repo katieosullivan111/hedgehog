@@ -3,12 +3,7 @@
 (require 2htdp/universe)
 (require "prototype.rkt")
 (require "physics.rkt")
-(provide SCENE.WIDTH SCENE.HEIGHT SCENE.HALFHEIGHT SCENE.HALFWIDTH updatebackground draw)
-
-(define SCENE.WIDTH  1000)
-(define SCENE.HEIGHT  1000)
-(define SCENE.HALFHEIGHT (/ SCENE.HEIGHT 2))
-(define SCENE.HALFWIDTH (/ SCENE.WIDTH 2))
+(provide updatebackground draw)
 
 (define road-colour (make-color 096 096 096))
 (define road (beside
@@ -25,8 +20,7 @@
 
 
  (define SCENE.BG  (overlay road (rectangle SCENE.WIDTH SCENE.HEIGHT 'solid 'white)))
-;(define SCENE.BG  (empty-scene SCENE.WIDTH SCENE.HEIGHT ))
-
+(define STEERINGWHEEL (add-line (circle 80 "solid" "black") 80 80 80 0 "blue"))
 
 (define CAR.WIDTH (m2p 2))
 (define CAR.LENGTH (m2p 5))
@@ -92,7 +86,7 @@
      (if (> (- (pos-y stripe) (pos-y (gs-camera game))) SCENE.HEIGHT)
          (pos (pos-x stripe) (- (pos-y stripe) SCENE.HEIGHT) )
     ;(pos (pos-x stripe) (-(pos-y stripe) player-y));    here currently the stripes keep moving on the screen even when the car is stopped
-         (pos (pos-x stripe) (+ (pos-y stripe) (/ (pos-y (gs-velocity game)) fps)   ;here the stripes stop/slow with the car, but disappear prematurely
+         (pos (pos-x stripe) (+ (pos-y stripe) (/ (pos-y (gs-velocity game)) (gs-fps game))   ;here the stripes stop/slow with the car, but disappear prematurely
        )))) stripes ))
    
     (set-gs-stripes! game (new-stripes (pos-y (gs-player game) ) ;    
@@ -117,9 +111,10 @@
 
      
       ,CAR
+      ,(rotate (* (gs-wheel game) -9) STEERINGWHEEL)
       ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 12 "red") ; Speed text
+      ,(text (string-append (number->string (gs-fps game)) " FPS") 12 "red") ; FPS
   ,(text (string-append "Score: " (number->string (round (* 3.6 (p2m (- (pos-y (gs-player game)))))))) 12 "red") ;Score text
-  ,(text (number->string (- (pos-y (first (gs-stripes game))) (pos-y (gs-camera game)))) 12 "red")
   ,truck1
   ,truck2
   ,truck3
@@ -136,10 +131,11 @@
      ;(pos 300 (- (pos-y (first (gs-stripes game))) (pos-y (gs-camera game))))
       
       ,@(map (lambda (stripe) (pos (pos-x stripe) (- (pos-y stripe) (pos-y (gs-camera game)) ) )) (gs-stripes game))
-     ,(pos (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game))))
+      ,(pos (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game))))
+      ,(pos 100 (- SCENE.HEIGHT 100)) ; Steering Wheel
       ,(pos 50 10) ; Speed text
+      ,(pos 50 30) ; FPS
       ,(pos 50 40) ; Score text
-      ,(pos 70 100)
       ,(pos (pos-x (gs-truck1 game)) (pos-y (gs-truck1 game)))
       ,(pos (pos-x (gs-truck2 game)) (pos-y (gs-truck2 game)))
       ,(pos (pos-x (gs-truck3 game)) (pos-y (gs-truck3 game)))

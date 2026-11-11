@@ -1,51 +1,67 @@
 #lang racket
 (require "prototype.rkt")
 (provide physics-update)
-(provide fps)
 
 ; Constants
-(define fps 30) ; Frames per second
 (define mu 0.7) ; Co-eff of friction
 (define g 9.8) ; m/s^2
 (define CAR.Cd 0.7) ; Co-eff of drag
 (define CAR.AREA 1.7) ; m^2
 (define CAR.MASS 800) ; kg
-(define CAR.TORQUE 150) ; Nm
+(define CAR.TORQUE 250) ; Nm
 (define CAR.WHEELRADIUS 0.3) ; m
-(define CAR.DRIVERATIO 8) ; Total Drive Ratio
+(define CAR.DRIVERATIO 6) ; Total Drive Ratio
 (define CAR.MAXRPM 20000) ; Max RPM
+(define CAR.WHEELBASE 2.7) ; m
 (define CAR.MAXSPEED (/ (* CAR.MAXRPM 2 pi CAR.WHEELRADIUS) (* 60 CAR.DRIVERATIO))) ; m/s
+
 ; Forces
 (define CAR.BRAKEPOWER (* 1.2 g CAR.MASS)) ; N
 (define friction (* mu CAR.MASS g)) ; N
 (define rolling-resistance (* 0.015 CAR.MASS g)) ; N
 (define traction (/ (* CAR.TORQUE CAR.DRIVERATIO) CAR.WHEELRADIUS)) ; N
 (define (drag v) (* 0.5 CAR.Cd CAR.AREA (sqr v))) ; N
-(define (netforce v a)
+(define (netforce v a d) ; velocity accelerator delta
   (if (and (= a 1) (< v CAR.MAXSPEED))
     (- traction rolling-resistance (drag v))
-    (if (> v 0) (- 0 (if (= a -1) CAR.BRAKEPOWER 0) rolling-resistance (drag v)) (* v CAR.MASS fps -1)))) ; N
+    (if (> v 0) (- 0 (if (= a -1) CAR.BRAKEPOWER 0) rolling-resistance (drag v)) (/ (* v CAR.MASS -1) d)))) ; N
 
-(define (physics-update game)
-  ; Acceleration
-  (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (+ (pos-y (gs-velocity game)) (m2p (/ (netforce (p2m (pos-y (gs-velocity game))) (gs-accelerator game)) CAR.MASS fps)))))
-  ; Update Player Position
-  (set-gs-player! game (pos (+ (pos-x (gs-player game)) (pos-x (gs-velocity game))) (- (pos-y (gs-player game)) (/ (pos-y (gs-velocity game)) fps))))
-    ; Collisions
-  (when
-    (or
-        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-truck1 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-truck1 game))) 2))) 10)
-        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-truck2 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-truck2 game))) 2))) 10)
-        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-truck3 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-truck3 game))) 2))) 10)
-        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-car1 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-car1 game))) 2))) 10)
-        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-car2 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-car2 game))) 2))) 10)
-        (<= (sqrt (+ (expt (- (pos-x (gs-player game)) (pos-x (gs-car3 game))) 2) (expt (- (pos-y (gs-player game)) (pos-y (gs-car3 game))) 2))) 10))
-     (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (pos-x (gs-player game)) (+ (pos-y (gs-player game)) 50))))
-  (if (< (pos-x (gs-player game)) 100)
-      (and (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (+ (pos-x (gs-player game)) 100) (pos-y (gs-player game)))))
-      game)
-  (if (> (pos-x (gs-player game)) 900)
-      (and (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (- (pos-x (gs-player game)) 100) (pos-y (gs-player game)))))
-      game)
-  game)
+; Mechanics
+(define steer-max 30) ; Max Steering Angle (degrees)
+(define (steer-omega d) (* 50 d)) ; Steering angular velocity (degrees/second)
+(define (steer-wheel game delta)
+  (local [
+    (define a
+      (max
+        (- steer-max) ; Keep wheel rotation within physical bounds
+        (min
+          steer-max
+          (+
+            (gs-wheel game)
+            (* (steer-omega delta)
+              (if (= (gs-steering game) 0)
+                  (cond [(> (gs-wheel game) 0) -1] [(< (gs-wheel game) 0) 1] [else 0]) ; Wheel snap-back
+                  (gs-steering game))))))) ; User steer
+    ]
+    (if (and (= (gs-steering game) 0) (< (abs a) 1)) 0 a)))
 
+; tick
+(define (physics-update game delta)
+  (set-gs-wheel! game (steer-wheel game delta)) ; Steer update
+
+  (local [
+    (define xspeed (m2p (gs-wheel game)))
+    (define yspeed (pos-y (gs-velocity game)))
+    (define newyspeed (max 0 (+ yspeed (m2p (* (/ (netforce (p2m yspeed) (gs-accelerator game) delta) CAR.MASS) delta)))))]
+    (set-gs-velocity! game (pos xspeed newyspeed))
+
+    ; Update Position
+    (set-gs-player! game
+    (pos
+      (+ (pos-x (gs-player game)) (* xspeed delta))
+      (- (pos-y (gs-player game)) (* newyspeed delta)))))
+
+  ; Camera update
+  (set-gs-camera! game (pos 0 (- (pos-y (gs-player game)) SCENE.CAMERAHEIGHT)))
+  game
+)
