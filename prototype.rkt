@@ -1,5 +1,9 @@
 #lang racket
+(require json)
 (provide (all-defined-out))
+
+; Read data from config file
+(define config (call-with-input-file "config.json" read-json))
 
 ; General
 (struct pos (x y)) ; Position Structure
@@ -19,9 +23,9 @@
     (sqrt (+ (sqr (pos-x p)) (sqr (pos-y p)))))
 
 ; Animation
-(define MAXFPS 60)
-(define SCENE.WIDTH  1000)
-(define SCENE.HEIGHT  700)
+(define MAXFPS (hash-ref config 'max_fps))
+(define SCENE.WIDTH (hash-ref (hash-ref config 'resolution) 'width))
+(define SCENE.HEIGHT (hash-ref (hash-ref config 'resolution) 'height))
 (define SCENE.HALFHEIGHT (/ SCENE.HEIGHT 2))
 (define SCENE.HALFWIDTH (/ SCENE.WIDTH 2))
-(define SCENE.CAMERAHEIGHT (- SCENE.HEIGHT 200))
+(define SCENE.CAMERAHEIGHT (- SCENE.HEIGHT 150))
