@@ -5,15 +5,15 @@
 (require "physics.rkt")
 (provide updatebackground draw)
 
-(define road-colour (make-color 096 096 096))
-(define road (beside
+(define ROAD.COLOUR (make-color 096 096 096))
+(define ROAD (beside
               (rectangle 10 SCENE.HEIGHT 'solid 'grey)
-              (rectangle 800 SCENE.HEIGHT 'solid road-colour)
+              (rectangle ROAD.WIDTH SCENE.HEIGHT 'solid ROAD.COLOUR)
               (rectangle 10 SCENE.HEIGHT 'solid 'grey)
               ))
-(define ROADSTRIPE (rectangle 6 30 'solid 'white))
-(define stripes-imgs (make-list 15 ROADSTRIPE))
-(define SCENE.BG  (overlay road (rectangle SCENE.WIDTH SCENE.HEIGHT 'solid 'white)))
+(define ROAD.STRIPE (rectangle 6 30 'solid 'white))
+(define stripes-imgs (make-list 15 ROAD.STRIPE))
+(define SCENE.BG  (overlay ROAD (rectangle SCENE.WIDTH SCENE.HEIGHT 'solid 'white)))
 
 (define STEERINGWHEEL (add-line (circle 80 "solid" "black") 80 80 80 0 "blue"))
 
@@ -21,28 +21,24 @@
 (define CAR.WIDTH (m2p 2))
 (define CAR.LENGTH (m2p 5))
 
-;Other Vehicles
-(define truck1 (rectangle 5 15 'solid 'blue))
-(define car1 (circle 20 'solid 'green))
-(define car2 (circle 30 'solid 'green))
-(define car3 (circle 30 'solid 'green))
-(define truck2 (rectangle 5 15 'solid 'blue))
-(define truck3 (rectangle 5 15 'solid 'blue))
-
 (define (updatebackground game)
   (local [
     (define stripes (gs-stripes game))
     (define (new-stripes player-y)
-      (map (lambda (stripe)
-        (if (> (- (pos-y stripe) (pos-y (gs-camera game))) SCENE.HEIGHT)
-            (pos (pos-x stripe) (- (pos-y stripe) SCENE.HEIGHT) )
-            (pos (pos-x stripe) (+ (pos-y stripe) (/ (pos-y (gs-velocity game)) (gs-fps game))   ;here the stripes stop/slow with the car, but disappear prematurely
-          )))) stripes ))
+      (map (lambda (x)
+        (map (lambda (y)
+          (if (> (- y (pos-y (gs-camera game))) SCENE.HEIGHT)
+            (- y SCENE.HEIGHT)
+            (+ y (/ (pos-y (gs-velocity game)) (gs-fps game))) ;here the stripes stop/slow with the car, but disappear prematurely
+          )) x))
+        stripes))
   ]
   (set-gs-stripes! game (new-stripes (pos-y (gs-player game) )))
   game))
+(define (parse-stripes list)
+  (map (lambda (stripe) (pos (pos-x stripe) (- (pos-y stripe) (pos-y (gs-camera game)) ) )) (gs-stripes game)))
 
-(define (draw-scene imgs posns) ; Draw scene from list of images and positions
+(define (draw-scene imgs posns) ; Draw scene from lists of images and positions
   (foldl (lambda (img pos scene)
     (place-image img (pos-x pos) (pos-y pos) scene))
     SCENE.BG
@@ -58,28 +54,17 @@
       ,(rotate (* (gs-wheel game) -9) STEERINGWHEEL)
       ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 12 "red") ; Speed text
       ,(text (string-append (number->string (gs-fps game)) " FPS") 12 "red") ; FPS
-      ,(text (string-append "Score: " (number->string (round (* 3.6 (p2m (- (pos-y (gs-player game)))))))) 12 "red") ;Score text
-      ,truck1
-      ,truck2
-      ,truck3
-      ,car1
-      ,car2
-      ,car3)
+      ,(text (string-append "Score: " (number->string (round (* 3.6 (p2m (- (pos-y (gs-player game)))))))) 12 "red") ; Score text
+    )
     `(
      ;(pos 500 (stripe-position game (pos-y (gs-stripe1 game)))) ;TO BE RETURNED TO !!!!!!!!
      
      ;(pos 300 (- (pos-y (first (gs-stripes game))) (pos-y (gs-camera game))))
-      
-      ,@(map (lambda (stripe) (pos (pos-x stripe) (- (pos-y stripe) (pos-y (gs-camera game)) ) )) (gs-stripes game))
+      ,@(parse-stripes (gs-stripes game))
       ,(pos (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game))))
       ,(pos 100 (- SCENE.HEIGHT 100)) ; Steering Wheel
       ,(pos 50 10) ; Speed text
       ,(pos 50 30) ; FPS
       ,(pos 50 40) ; Score text
-      ,(pos (pos-x (gs-truck1 game)) (pos-y (gs-truck1 game)))
-      ,(pos (pos-x (gs-truck2 game)) (pos-y (gs-truck2 game)))
-      ,(pos (pos-x (gs-truck3 game)) (pos-y (gs-truck3 game)))
-      ,(pos (pos-x (gs-car1 game)) (pos-y (gs-car1 game)))
-      ,(pos (pos-x (gs-car2 game)) (pos-y (gs-car2 game)))
-      ,(pos (pos-x (gs-car3 game)) (pos-y (gs-car3 game))))
+    )
 ))
