@@ -1,7 +1,7 @@
 #lang racket
 (require 2htdp/image)
 (require 2htdp/universe)
-(require "prototype.rkt")
+(require "header.rkt")
 (require "physics.rkt")
 (provide TICK-animation draw)
 

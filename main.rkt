@@ -3,7 +3,7 @@
 (require 2htdp/universe)
 
 ; Local Modules
-(require "dep/prototype.rkt")
+(require "dep/header.rkt")
 (require "dep/physics.rkt")
 (require "dep/animation.rkt")
 

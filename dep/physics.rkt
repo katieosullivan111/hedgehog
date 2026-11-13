@@ -1,5 +1,5 @@
 #lang racket
-(require "prototype.rkt")
+(require "header.rkt")
 (provide TICK-physics)
 
 ; Constants
