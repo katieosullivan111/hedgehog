@@ -24,7 +24,7 @@
 (define (objects game) (list ; Last item in list is on top
       CAR
       (text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 12 "red") ;Speed text
-  (text (string-append "Score: " (number->string (round (/ (+ (- (pos-y (gs-player game))) 500) 10)))) 12 "red") ;Score text
+  (text (string-append "Score: " (number->string (round (- (- (pos-y (gs-player game)) 500))))) 12 "red") ;Score text
   (text (string-append "Lives: " (number->string (gs-lives game))) 18 "blue") ;Lives text
   (text "MADE BY:" 70 "white")
   (text "JACK" 80 "white")
@@ -50,10 +50,8 @@
      (pos (- (pos-x (gs-BOOST game)) (pos-x (gs-camera game))) (- (pos-y (gs-BOOST game)) (pos-y (gs-camera game))))
       (pos (- (pos-x (gs-EXTRALIFE game)) (pos-x (gs-camera game))) (- (pos-y (gs-EXTRALIFE game)) (pos-y (gs-camera game))))
       (pos 500 (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 350))
-      (pos (pos-x (gs-BOOST game)) (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 350)) ;Sets the rectangle to show the next BOOST'S x-co-ordinate
-      (pos (pos-x (gs-EXTRALIFE game)) (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 350)))) ;Sets the rectangle to show the next EXTRALIFE'S x-co-ordinate
-
-
+      (pos (pos-x (gs-BOOST game)) (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 350)) ;Sets the rectangle to show the next BOOST'S x co-ordinate
+      (pos (pos-x (gs-EXTRALIFE game)) (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 350)))) ;Sets the rectangle to show the next EXTRALIFE'S x co-ordinate
 
 (define (draw-scene imgs posns) ; Draw scene from list of images and positions
   (foldl (lambda (img pos scene)

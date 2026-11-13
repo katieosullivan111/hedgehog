@@ -10,7 +10,7 @@
 (require "NPC-MOVEMENT.rkt")
 
 ; Constants
-(define move-size 50)
+(define move-size 20)
 
 ; Initialise Game State
 (define init  (gs (pos 0 0) (pos SCENE.HALFWIDTH SCENE.HALFHEIGHT) (pos 0 0) 0 3  (pos (+ (random 800) 100) (+ (random 800) 100))
@@ -18,7 +18,7 @@
                                                                                                 
 ; Ticking and Animation
 (define (tick game) (set-gs-camera! (physics-update game) (pos 0 (- (pos-y (gs-player game)) SCENE.HALFHEIGHT)))
-(collisions-update game) game)
+(collisions-update game) (nee-naw game) (vroom-vroom game) game)
 
 ; Event Handlers
 (define (keydown game k)
