@@ -3,9 +3,9 @@
 (require 2htdp/universe)
 
 ; Local Modules
-(require "prototype.rkt")
-(require "physics.rkt")
-(require "animation.rkt")
+(require "dep/prototype.rkt")
+(require "dep/physics.rkt")
+(require "dep/animation.rkt")
 
 ; Initialise Game State
 (define init (gs
@@ -14,26 +14,25 @@
     0 ; accelerator input
     0 0 ; wheel rotation and steering input
     3 ; lives
-    (list ; stripes
-      (list 0 200 400 600 800) ; Lane 1
-      (list 0 200 400 600 800) ; Lane 2
-      (list 0 200 400 600 800)) ; Lane 3
+    0 ; stripe-y
   ))
 ;maybe should create function for stripes initial positions
 
 ; Ticking and Animation
 (define (tick game)
   (local [
-          (define now (/ (current-inexact-milliseconds) 1000))
-          (define delta (min (- now (gs-t game)) 0.1)) ; delta time between frames, limit to 10 fps
-        ]
-        (physics-update game delta)
-        (set-gs-t! game now)
-        (when (= (modulo (round (* now 10)) 5) 0)
-          (set-gs-fps! game (round (/ 1000 (round (* 1000 delta))))))
-        
-        (updatebackground game)
-        game))
+    (define now (/ (current-inexact-milliseconds) 1000))
+    (define delta (min (- now (gs-t game)) 0.1)) ; delta time between frames, limit to >= 10 fps
+  ]
+  (TICK-physics game delta)
+  (TICK-animation game)
+
+  ; Update fps counter
+  (set-gs-t! game now)
+  (when (= (modulo (round (* now 10)) 5) 0)
+    (set-gs-fps! game (round (/ 1000 (round (* 1000 delta))))))
+  
+  game))
 
 ; Event Handlers
 (define (keydown game k)

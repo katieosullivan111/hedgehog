@@ -1,6 +1,6 @@
 #lang racket
 (require "prototype.rkt")
-(provide physics-update)
+(provide TICK-physics)
 
 ; Constants
 (define mu 0.7) ; Co-eff of friction
@@ -46,7 +46,7 @@
     (if (and (= (gs-steering game) 0) (< (abs a) 1)) 0 a)))
 
 ; tick
-(define (physics-update game delta)
+(define (TICK-physics game delta)
   (set-gs-wheel! game (steer-wheel game delta)) ; Steer update
 
   (local [
