@@ -18,7 +18,7 @@
     (sqrt (+ (sqr (pos-x p)) (sqr (pos-y p)))))
 
 ; Animation
-(define MAXFPS 240)
+(define MAXFPS 60)
 (define SCENE.WIDTH  1000)
 (define SCENE.HEIGHT  700)
 (define SCENE.HALFHEIGHT (/ SCENE.HEIGHT 2))

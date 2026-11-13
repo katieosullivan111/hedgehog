@@ -1,6 +1,4 @@
 #lang racket
-
-;HELLOOOO
 (require 2htdp/image)
 (require 2htdp/universe)
 
@@ -9,12 +7,9 @@
 (require "physics.rkt")
 (require "animation.rkt")
 
-; Constants
-(define move-size 20)
-
 ; Initialise Game State
 (define init (gs (/ (current-inexact-milliseconds) 1000) 1
-                 (pos 0 0) (pos SCENE.HALFWIDTH SCENE.HALFHEIGHT) (pos 0 0) 0
+                 (pos 0 0) (pos SCENE.HALFWIDTH 0) (pos 0 (m2p 2)) 0
                  0 0
                  3 ;lives
                  (pos 150 400) (pos 100 200) (pos 300 200) (pos 400 300) (pos 340 350) (pos 290 400)
@@ -23,17 +18,18 @@
 
 ; Ticking and Animation
 (define (tick game)
-  (local [(define now (/ (current-inexact-milliseconds) 1000))
+  (local [
+          (define now (/ (current-inexact-milliseconds) 1000))
           (define delta (min (- now (gs-t game)) 0.1)) ; delta time between frames, limit to 10 fps
-          ]
-          (physics-update game delta)
-  (set-gs-t! game now)
-  (set-gs-fps! game (round (/ 1000 (round (* 1000 delta)))))
-  
-  ;(set-gs-camera! game (pos 0 (- (pos-y (gs-player game)) SCENE.HALFHEIGHT)))
-  (updatebackground game)
-  (NPC-MOVEMENT game)
-  game))
+        ]
+        (physics-update game delta)
+        (set-gs-t! game now)
+        (when (= (modulo (round (* now 10)) 5) 0)
+          (set-gs-fps! game (round (/ 1000 (round (* 1000 delta))))))
+        
+        (updatebackground game)
+        (NPC-MOVEMENT game)
+        game))
 
 ; Event Handlers
 (define (keydown game k)
@@ -66,7 +62,5 @@
        #true
        #false))
 
-
-
 ; Start the game
-(big-bang init [on-tick tick] [to-draw draw] [on-key keydown] [on-release keyup] [stop-when game-over?])
+(big-bang init [on-tick tick (/ 1 MAXFPS)] [to-draw draw] [on-key keydown] [on-release keyup] [stop-when game-over?])
