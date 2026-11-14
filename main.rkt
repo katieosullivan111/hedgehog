@@ -6,6 +6,7 @@
 (require "dep/header.rkt")
 (require "dep/physics.rkt")
 (require "dep/animation.rkt")
+(require "dep/AI.rkt")
 
 ; Initialise Game State
 (define init (gs
