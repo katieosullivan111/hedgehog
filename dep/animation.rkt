@@ -26,11 +26,17 @@
 
 (define SCENE.BG  (overlay ROAD (rectangle SCENE.WIDTH SCENE.HEIGHT 'solid 'green)))
 
-(define STEERINGWHEEL (scale 0.3 (bitmap "../img/steering-wheel.png")))
+(define STEERINGWHEEL (scale 0.7 (bitmap "../img/drivingwheel.png")))
 
 (define CAR (bitmap "../img/car.png"))
 (define CAR.WIDTH (m2p 2))
 (define CAR.LENGTH (m2p 5))
+
+(define BOOST (bitmap "../img/BOOST.png"))
+(define EXTRALIFE (bitmap "../img/life.png"))
+(define NAVIGATION-BAR (rectangle 800 10 'solid 'grey))
+(define BOOST-BAR (rectangle 20 10 'solid 'red))
+(define LIFE-BAR (rectangle 20 10 'solid 'blue))
 
 ; Utility Functions
 (define (construct-lanes y) ; Constructs a list of positions of the lanes

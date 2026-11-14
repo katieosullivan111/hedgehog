@@ -9,14 +9,16 @@
 
 ; Initialise Game State
 (define init (gs
-    (/ (current-inexact-milliseconds) 1000) 1 ; time and fps
-    (pos 0 0) (pos SCENE.HALFWIDTH 0) (pos 0 (m2p 2)) ; camera, player, velocity vectors
-    0 ; accelerator input
-    0 0 ; wheel rotation and steering input
-    3 ; lives
-    0 ; stripe-y
-  ))
-;maybe should create function for stripes initial positions
+  (/ (current-inexact-milliseconds) 1000) 1 ; time and fps
+  (pos 0 0) (pos SCENE.HALFWIDTH 0) (pos 0 (m2p 2)) ; camera, player, velocity vectors
+  0 ; accelerator input
+  0 0 ; wheel rotation and steering input
+  3 ; lives
+  0 ; lane-y
+  (pos (+ (random 800) 100) (+ (random 800) 100)) ; BOOST
+  (pos (+ (random 800) 100) (+ (random 800) 100)) ; EXTRALIFE
+  `() ; list of cars
+))
 
 ; Ticking and Animation
 (define (tick game)

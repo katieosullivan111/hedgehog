@@ -7,7 +7,8 @@
 
 ; General
 (struct pos (x y)) ; Position Structure
-(struct gs (t fps camera player velocity accelerator wheel steering lives lane-y) #:mutable) ; Game State
+(struct car (pos index)) ; position and image index
+(struct gs (t fps camera player velocity accelerator wheel steering lives lane-y BOOST EXTRALIFE cars) #:mutable) ; Game State
 ; <number (s)> <number> <vector> <vector> <vector> <int [-1, 1]> <number (degrees)> <int [-1, 1]>
 
 ; Unit conversion
