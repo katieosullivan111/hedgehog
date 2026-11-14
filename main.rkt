@@ -30,7 +30,7 @@
   ; Update fps counter
   (set-gs-t! game now)
   (when (= (modulo (round (* now 10)) 5) 0)
-    (set-gs-fps! game (round (/ 1000 (round (* 1000 delta))))))
+    (set-gs-fps! game (round (/ 1000 (* 1000 delta)))))
   
   game))
 

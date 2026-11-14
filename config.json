@@ -1,8 +1,8 @@
 {
-    "max_fps": 200,
+    "max_fps": 120,
     "resolution":
     {
-        "width": 1999,
-        "height": 1349
+        "width": 999,
+        "height": 699
     }
 }

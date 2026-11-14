@@ -26,7 +26,6 @@
 
 (define SCENE.BG  (overlay ROAD (rectangle SCENE.WIDTH SCENE.HEIGHT 'solid 'green)))
 
-; (define STEERINGWHEEL (add-line (circle 80 "solid" "black") 80 80 80 0 "blue"))
 (define STEERINGWHEEL (scale 0.3 (bitmap "../img/steering-wheel.png")))
 
 (define CAR (bitmap "../img/car.png"))
@@ -59,7 +58,7 @@
       ,(rotate (* (gs-wheel game) -9) STEERINGWHEEL)
 
       ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 16 "red") ; Speed text
-      ,(text (string-append "Score: " (number->string (round (* 3.6 (p2m (- (pos-y (gs-player game)))))))) 16 "red") ; Score text
+      ,(text (string-append "Score: " (number->string (round (p2m (- (pos-y (gs-player game))))))) 16 "red") ; Score text
       ,(text (string-append (number->string (gs-fps game)) " FPS") 16 "red") ; FPS
     )
     `(
