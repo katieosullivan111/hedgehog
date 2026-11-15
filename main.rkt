@@ -7,6 +7,7 @@
 (require "dep/physics.rkt")
 (require "dep/animation.rkt")
 (require "dep/AI.rkt")
+(require "dep/collisions-update.rkt")
 
 ; Initialise Game State
 (define init (gs
@@ -18,7 +19,7 @@
   0 ; lane-y
   (pos (+ (random 800) 100) (+ (random 800) 100)) ; BOOST
   (pos (+ (random 800) 100) (+ (random 800) 100)) ; EXTRALIFE
-  `() ; list of cars
+  AI.cars ; list of cars
 ))
 
 ; Ticking and Animation
@@ -29,6 +30,8 @@
   ]
   (TICK-physics game delta)
   (TICK-animation game)
+  
+  (collisions-update game)
 
   ; Update fps counter
   (set-gs-t! game now)

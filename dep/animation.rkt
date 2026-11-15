@@ -3,6 +3,7 @@
 (require 2htdp/universe)
 (require "header.rkt")
 (require "physics.rkt")
+(require "AI.rkt")
 (provide TICK-animation draw)
 
 ; Value Definitions
@@ -71,6 +72,9 @@
 
         ,BOOST
         ,EXTRALIFE
+
+        ,@(AI.extract-images game)
+
         ,NAVIGATION-BAR
         ,BOOST-BAR
         ,LIFE-BAR
@@ -93,9 +97,12 @@
         ,(pos SCENE.HALFWIDTH (- -200 ycam))
         ,(pos SCENE.HALFWIDTH (- -100 ycam))
         
-        ,(pos (- (pos-x (gs-BOOST game)) xcam) (- (pos-y (gs-BOOST game)) ycam))
-        ,(pos (- (pos-x (gs-EXTRALIFE game)) xcam) (- (pos-y (gs-EXTRALIFE game)) ycam))
-        ,(pos 500 (+ (- (pos-y (gs-player game)) ycam) 350))
+        ,(pos (- (pos-x (gs-BOOST game)) xcam) (- (pos-y (gs-BOOST game)) ycam)) ; Boost
+        ,(pos (- (pos-x (gs-EXTRALIFE game)) xcam) (- (pos-y (gs-EXTRALIFE game)) ycam)) ; Extralife
+
+        ,@(AI.extract-positions game)
+
+        ,(pos 500 (+ (- (pos-y (gs-player game)) ycam) 350)) ; Navbar
         ,(pos (pos-x (gs-BOOST game)) (+ (- (pos-y (gs-player game)) ycam) 350)) ;Sets the rectangle to show the next BOOST'S x co-ordinate
         ,(pos (pos-x (gs-EXTRALIFE game)) (+ (- (pos-y (gs-player game)) ycam) 350))
 
