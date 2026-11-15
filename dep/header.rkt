@@ -6,21 +6,14 @@
 (define config (call-with-input-file "config.json" read-json))
 
 ; General
-(struct pos (x y)) ; Position Structure
-(struct gs (t fps camera player velocity accelerator wheel steering lives lane-y) #:mutable) ; Game State
+(struct pos (x y) #:transparent) ; Position Structure
+(struct car (pos index) #:transparent) ; position and image index
+(struct gs (t fps camera player velocity accelerator wheel steering lives lane-y BOOST EXTRALIFE cars) #:mutable) ; Game State
 ; <number (s)> <number> <vector> <vector> <vector> <int [-1, 1]> <number (degrees)> <int [-1, 1]>
 
 ; Unit conversion
 (define (m2p m) (* m 20)) ; meters to pixels
 (define (p2m p) (/ p 20)) ; pixels to meters
-(define (d2r d) (* d (/ pi 180))) ; degrees to radians
-(define (r2d r) (* r (/ 180 pi))) ; radians to degrees
-(define (pos2d p default) ; pos to degrees
-    (if (and (= (pos-x p) 0) (= (pos-y p) 0))
-        default
-        (- (r2d (atan (pos-y p) (pos-x p))) 90)))
-(define (abspos p) ; Absolute value of pos
-    (sqrt (+ (sqr (pos-x p)) (sqr (pos-y p)))))
 
 ; Animation
 (define MAXFPS (hash-ref config 'max_fps))
@@ -32,7 +25,10 @@
 (define SCENE.HALFWIDTH (/ SCENE.WIDTH 2))
 (define SCENE.CAMERAHEIGHT (- SCENE.HEIGHT 150))
 
-(define ROAD.LANES 3)
+(define ROAD.LANES 5)
 (define ROAD.STRIPESPACING 150)
 (define ROAD.STRIPEHEIGHT 50)
 (define ROAD.STRIPES/LANE (quotient SCENE.HEIGHT ROAD.STRIPESPACING))
+
+; AI
+(define AI.count (hash-ref config 'npc-count))

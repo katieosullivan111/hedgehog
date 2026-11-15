@@ -6,17 +6,21 @@
 (require "dep/header.rkt")
 (require "dep/physics.rkt")
 (require "dep/animation.rkt")
+(require "dep/AI.rkt")
+(require "dep/collisions-update.rkt")
 
 ; Initialise Game State
 (define init (gs
-    (/ (current-inexact-milliseconds) 1000) 1 ; time and fps
-    (pos 0 0) (pos SCENE.HALFWIDTH 0) (pos 0 (m2p 2)) ; camera, player, velocity vectors
-    0 ; accelerator input
-    0 0 ; wheel rotation and steering input
-    3 ; lives
-    0 ; stripe-y
-  ))
-;maybe should create function for stripes initial positions
+  (/ (current-inexact-milliseconds) 1000) 1 ; time and fps
+  (pos 0 0) (pos SCENE.HALFWIDTH 0) (pos 0 (m2p 2)) ; camera, player, velocity vectors
+  0 ; accelerator input
+  0 0 ; wheel rotation and steering input
+  3 ; lives
+  0 ; lane-y
+  (pos (+ (random 800) 100) (+ (random 800) 100)) ; BOOST
+  (pos (+ (random 800) 100) (+ (random 800) 100)) ; EXTRALIFE
+  AI.cars ; list of cars
+))
 
 ; Ticking and Animation
 (define (tick game)
@@ -26,12 +30,14 @@
   ]
   (TICK-physics game delta)
   (TICK-animation game)
+  
+  (collisions-update game)
 
   ; Update fps counter
   (set-gs-t! game now)
   (when (= (modulo (round (* now 10)) 5) 0)
-    (set-gs-fps! game (round (/ 1000 (round (* 1000 delta))))))
-  
+    (set-gs-fps! game (round (/ 1000 (* 1000 delta)))))
+
   game))
 
 ; Event Handlers
