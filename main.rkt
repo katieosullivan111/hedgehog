@@ -9,34 +9,53 @@
 (require "collisions-update.rkt")
 (require "NPC-MOVEMENT.rkt")
 
-; Constants
-(define move-size 20)
-
 ; Initialise Game State
-(define init  (gs (pos 0 0) (pos SCENE.HALFWIDTH SCENE.HALFHEIGHT) (pos 0 0) 0 3  (pos (+ (random 800) 100) (+ (random 800) 100))
-                  (pos (+ (random 800) 100) (+ (random 800) 100)) los-coches))  
-                                                                                                
+(define init (gs (/ (current-inexact-milliseconds) 1000) 1
+                 (pos 0 0) (pos SCENE.HALFWIDTH 0) (pos 0 (m2p 2)) 0
+                 0 0
+                 3 ;lives
+                 (pos (+ (random 800) 100) (+ (random 800) 100))
+                 (pos (+ (random 800) 100) (+ (random 800) 100))
+                 (list (pos 300 200) (pos 500 100) (pos 700 200) (pos 300 400) (pos 500 300) (pos 700 400) (pos 300 600) (pos 500 500) (pos 700 600) (pos 500 700) (pos 300 800) (pos 500 900) (pos 700 800) (pos 300 0) (pos 700 0)) ; stripes
+         los-coches))
+;maybe should create function for stripes initial positions
+
 ; Ticking and Animation
-(define (tick game) (set-gs-camera! (physics-update game) (pos 0 (- (pos-y (gs-player game)) SCENE.HALFHEIGHT)))
-(collisions-update game) (nee-naw game) (vroom-vroom game) game)
+(define (tick game)
+  (local [
+          (define now (/ (current-inexact-milliseconds) 1000))
+          (define delta (min (- now (gs-t game)) 0.1)) ; delta time between frames, limit to 10 fps
+        ]
+        (physics-update game delta)
+        (set-gs-t! game now)
+        (when (= (modulo (round (* now 10)) 5) 0)
+          (set-gs-fps! game (round (/ 1000 (round (* 1000 delta))))))
+        
+        (updatebackground game) 
+      
+        (vroom-vroom game) (nee-naw game) (collisions-update game) game))
 
 ; Event Handlers
 (define (keydown game k)
-  (cond
-    [(key=? k "w") (set-gs-accelerator! game 1) game]
-    [(key=? k "s") (set-gs-accelerator! game -1) game]
-    [(key=? k "a") (set-gs-player! game (pos (- (pos-x (gs-player game)) move-size) (pos-y (gs-player game)))) game]
-    [(key=? k "d") (set-gs-player! game (pos (+ (pos-x (gs-player game)) move-size) (pos-y (gs-player game)))) game]
+  (case k
+    [("w") (set-gs-accelerator! game 1) game]
+    [("s") (set-gs-accelerator! game -1) game]
+    [("a") (set-gs-steering! game -1) game]
+    [("d") (set-gs-steering! game 1) game]
     [else game]))
 (define (keyup game k)
-  (cond
-    [(key=? k "w") (set-gs-accelerator! game 0) game]
-    [(key=? k "s") (set-gs-accelerator! game 0) game]
+  (case k
+    [("w") (set-gs-accelerator! game 0) game]
+    [("s") (set-gs-accelerator! game 0) game]
+    [("a") (when (equal? (gs-steering game) -1) (set-gs-steering! game 0)) game]
+    [("d") (when (equal? (gs-steering game) 1) (set-gs-steering! game 0)) game]
     [else game]))
 
-;Termination Clauses
+;game-over clause
 (define (game-over? game)
-    (= (gs-lives game) 0))
+   (if (= (gs-lives game) 0)
+       #true
+       #false))
 
-;Start the game
-(big-bang init [on-tick tick] [to-draw draw] [on-key keydown] [on-release keyup] [stop-when game-over?])
+; Start the game
+(big-bang init [on-tick tick (/ 1 MAXFPS)] [to-draw draw] [on-key keydown] [on-release keyup] [stop-when game-over?])

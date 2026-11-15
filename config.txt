@@ -1,0 +1,9 @@
+{
+    "max_fps": 60,
+    "resolution":
+    {
+        "width": 1000,
+        "height": 750
+    },
+ "car-n": 14
+}

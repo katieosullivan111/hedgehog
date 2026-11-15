@@ -2,66 +2,98 @@
 (require 2htdp/image)
 (require 2htdp/universe)
 (require "prototype.rkt")
+(require "physics.rkt")
 (require "NPC-MOVEMENT.rkt")
-(provide SCENE.WIDTH SCENE.HEIGHT SCENE.HALFHEIGHT SCENE.HALFWIDTH draw)
+(provide updatebackground draw)
 
-(define SCENE.WIDTH  1000)
-(define SCENE.HEIGHT  1000)
-(define SCENE.HALFHEIGHT (/ SCENE.HEIGHT 2))
-(define SCENE.HALFWIDTH (/ SCENE.WIDTH 2))
-(define SCENE.BG  (empty-scene SCENE.WIDTH SCENE.HEIGHT))
+(define road-colour (make-color 096 096 096))
+(define road (beside
+              (rectangle 10 SCENE.HEIGHT 'solid 'grey)
+              (rectangle 800 SCENE.HEIGHT 'solid road-colour)
+              (rectangle 10 SCENE.HEIGHT 'solid 'grey)
+              ))
+(define ROADSTRIPE (rectangle 6 30 'solid 'white))
+(define stripes-imgs (make-list 15 ROADSTRIPE))
+(define SCENE.BG  (overlay road (rectangle SCENE.WIDTH SCENE.HEIGHT 'solid 'white)))
 
+(define STEERINGWHEEL (add-line (circle 80 "solid" "black") 80 80 80 0 "blue"))
+
+(define CAR (bitmap "car.png"))
 (define CAR.WIDTH (m2p 2))
 (define CAR.LENGTH (m2p 5))
-(define CAR (bitmap "car.png"))
 (define BOOST (bitmap "BOOST.png"))
 (define EXTRALIFE (bitmap "EXTRALIFE.png"))
 (define NAVIGATION-BAR (rectangle 800 10 'solid 'grey))
 (define BOOST-BAR (rectangle 20 10 'solid 'red))
 (define LIFE-BAR (rectangle 20 10 'solid 'blue))
-                   
-;Creates a list of gs objects excluding NPCs
-(define (objects game) (list ; Last item in list is on top
-      CAR
-      (text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 12 "red") ;Speed text
-  (text (string-append "Score: " (number->string (round (- (- (pos-y (gs-player game)) 500))))) 12 "red") ;Score text
-  (text (string-append "Lives: " (number->string (gs-lives game))) 18 "blue") ;Lives text
-  (text "MADE BY:" 70 "white")
-  (text "JACK" 80 "white")
-  (text "KATIE" 80 "white")
-  (text "TIERNAN" 80 "white")
-  BOOST
-  EXTRALIFE
-  NAVIGATION-BAR
-  BOOST-BAR
-  LIFE-BAR))
 
 
-;Creates a list of gs positions excluding NPCs
-(define (object-posns game) (list
-      (pos (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game))))
-      (pos 50 10) ; Speed text
-      (pos 50 40) ; Score text
-      (pos 50 70) ; Lives text
-      (pos 300 (- 100 (pos-y (gs-camera game))))
-      (pos 300 (- 200 (pos-y (gs-camera game))))
-      (pos 300 (- 300 (pos-y (gs-camera game))))
-      (pos 300 (- 400 (pos-y (gs-camera game))))
-     (pos (- (pos-x (gs-BOOST game)) (pos-x (gs-camera game))) (- (pos-y (gs-BOOST game)) (pos-y (gs-camera game))))
-      (pos (- (pos-x (gs-EXTRALIFE game)) (pos-x (gs-camera game))) (- (pos-y (gs-EXTRALIFE game)) (pos-y (gs-camera game))))
-      (pos 500 (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 350))
-      (pos (pos-x (gs-BOOST game)) (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 350)) ;Sets the rectangle to show the next BOOST'S x co-ordinate
-      (pos (pos-x (gs-EXTRALIFE game)) (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 350)))) ;Sets the rectangle to show the next EXTRALIFE'S x co-ordinate
+(define (updatebackground game)
+  (local [
+    (define stripes (gs-stripes game))
+    (define (new-stripes player-y)
+      (map (lambda (stripe)
+        (if (> (- (pos-y stripe) (pos-y (gs-camera game))) SCENE.HEIGHT)
+            (pos (pos-x stripe) (- (pos-y stripe) SCENE.HEIGHT) )
+            (pos (pos-x stripe) (+ (pos-y stripe) (/ (pos-y (gs-velocity game)) (gs-fps game))   ;here the stripes stop/slow with the car, but disappear prematurely
+          )))) stripes ))
+  ]
+  (set-gs-stripes! game (new-stripes (pos-y (gs-player game) )))
+  game))
 
 (define (draw-scene imgs posns) ; Draw scene from list of images and positions
   (foldl (lambda (img pos scene)
     (place-image img (pos-x pos) (pos-y pos) scene))
     SCENE.BG
     imgs
-    posns))    
+    posns))
 
-(define (draw game)
+(define (objects game) ; Last item in list is on top
+     `(,@stripes-imgs
+     
+      ,CAR
+      ,(rotate (* (gs-wheel game) -9) STEERINGWHEEL)
+      ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 12 "red") ; Speed text
+      ,(text (string-append (number->string (gs-fps game)) " FPS") 12 "red") ; FPS
+      ,(text (string-append "Score: " (number->string (round (- (pos-y (gs-player game)))))) 12 "red") ;Score text
+    ,(text (string-append "Lives: " (number->string (gs-lives game))) 18 "blue") ;Lives text
+    ,(text (string-append "CARS: " (number->string (length (gs-cars game)))) 18 "blue") ;Lives text
+  ,(text "MADE BY:" 70 "white")
+ ,(text "JACK" 80 "white")
+  ,(text "KATIE" 80 "white")
+  ,(text "TIERNAN" 80 "white")
+  ,BOOST
+ ,EXTRALIFE
+  ,NAVIGATION-BAR
+  ,BOOST-BAR
+  ,LIFE-BAR))
+
+
+    (define (object-posns game)
+     ;(pos 500 (stripe-position game (pos-y (gs-stripe1 game)))) ;TO BE RETURNED TO !!!!!!!!
+     
+     ;(pos 300 (- (pos-y (first (gs-stripes game))) (pos-y (gs-camera game))))
+      
+      `(,@(map (lambda (stripe) (pos (pos-x stripe) (- (pos-y stripe) (pos-y (gs-camera game)) ) )) (gs-stripes game))
+      ,(pos (- (pos-x (gs-player game)) (pos-x (gs-camera game))) (- (pos-y (gs-player game)) (pos-y (gs-camera game))))
+      ,(pos 100 (- SCENE.HEIGHT 100)) ; Steering Wheel
+      ,(pos 50 10) ; Speed text
+      ,(pos 50 30) ; FPS
+      ,(pos 50 40) ; Score text
+        ,(pos 50 70) ; Lives text
+        , (pos 50 100)
+      ,(pos 300 (- (pos-y (gs-camera game)) 300)) ;credits text
+      ,(pos 300 (- (pos-y (gs-camera game)) 400))
+      ,(pos 300 (- (pos-y (gs-camera game)) 500))
+      ,(pos 300 (- (pos-y (gs-camera game)) 600))
+     ,(pos (- (pos-x (gs-BOOST game)) (pos-x (gs-camera game))) (- (pos-y (gs-BOOST game)) (pos-y (gs-camera game))))
+      ,(pos (- (pos-x (gs-EXTRALIFE game)) (pos-x (gs-camera game))) (- (pos-y (gs-EXTRALIFE game)) (pos-y (gs-camera game))))
+      ,(pos 500 (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 100))
+      ,(pos (pos-x (gs-BOOST game)) (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 100)) ;Sets the rectangle to show the next BOOST'S x co-ordinate
+      ,(pos (pos-x (gs-EXTRALIFE game)) (+ (- (pos-y (gs-player game)) (pos-y (gs-camera game))) 100)))) ;Sets the rectangle to show the next EXTRALIFE'S x co-ordinate
+   
+
+  (define (draw game)
   (draw-scene
      (append  (objects game) (nee-naw game)) ;Combines objects and NPCs to be placed
     (append  (object-posns game) (vroom-vroom game))))
-
