@@ -35,9 +35,9 @@
 
 (define BOOST (bitmap "../img/BOOST.png"))
 (define EXTRALIFE (bitmap "../img/life.png"))
-(define NAVIGATION-BAR (rectangle 800 10 'solid 'grey))
-(define BOOST-BAR (rectangle 20 10 'solid 'red))
-(define LIFE-BAR (rectangle 20 10 'solid 'blue))
+(define NAVIGATION-BAR (rectangle 800 8 'solid 'grey))
+(define BOOST-BAR (rectangle 20 8 'solid 'red))
+(define LIFE-BAR (rectangle 20 8 'solid 'blue))
 
 ; Utility Functions
 (define (construct-lanes y) ; Constructs a list of positions of the lanes
@@ -108,9 +108,9 @@
         ,(pos (- (pos-x (gs-player game)) xcam) (- (pos-y (gs-player game)) ycam)) ; Player
 
         ; HUD
-        ,(pos 500 (+ (- (pos-y (gs-player game)) ycam) 350)) ; Navbar
-        ,(pos (pos-x (gs-BOOST game)) (+ (- (pos-y (gs-player game)) ycam) 350)) ;Sets the rectangle to show the next BOOST'S x co-ordinate
-        ,(pos (pos-x (gs-EXTRALIFE game)) (+ (- (pos-y (gs-player game)) ycam) 350))
+        ,(pos SCENE.HALFWIDTH 4) ; Navbar
+        ,(pos (pos-x (gs-BOOST game)) 4) ;Sets the rectangle to show the next BOOST'S x co-ordinate
+        ,(pos (pos-x (gs-EXTRALIFE game)) 4)
 
         ,(pos 100 (- SCENE.HEIGHT 100)) ; Steering Wheel
         
