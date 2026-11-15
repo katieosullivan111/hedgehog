@@ -73,15 +73,15 @@
         ,BOOST
         ,EXTRALIFE
 
-        ,@(AI.extract-images game)
-
-        ,NAVIGATION-BAR
-        ,BOOST-BAR
-        ,LIFE-BAR
+        ,@(map car-index (gs-cars game))
 
         ,CAR
 
         ; HUD
+        ,NAVIGATION-BAR
+        ,BOOST-BAR
+        ,LIFE-BAR
+
         ,(rotate (* (gs-wheel game) -9) STEERINGWHEEL)
 
         ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 16 'red) ; Speed text
@@ -100,15 +100,18 @@
         ,(pos (- (pos-x (gs-BOOST game)) xcam) (- (pos-y (gs-BOOST game)) ycam)) ; Boost
         ,(pos (- (pos-x (gs-EXTRALIFE game)) xcam) (- (pos-y (gs-EXTRALIFE game)) ycam)) ; Extralife
 
-        ,@(AI.extract-positions game)
-
-        ,(pos 500 (+ (- (pos-y (gs-player game)) ycam) 350)) ; Navbar
-        ,(pos (pos-x (gs-BOOST game)) (+ (- (pos-y (gs-player game)) ycam) 350)) ;Sets the rectangle to show the next BOOST'S x co-ordinate
-        ,(pos (pos-x (gs-EXTRALIFE game)) (+ (- (pos-y (gs-player game)) ycam) 350))
+        ,@(map
+          (lambda (car)
+            (pos (pos-x (car-pos car)) (- (pos-y (car-pos car)) ycam)))
+          (gs-cars game))
 
         ,(pos (- (pos-x (gs-player game)) xcam) (- (pos-y (gs-player game)) ycam)) ; Player
 
         ; HUD
+        ,(pos 500 (+ (- (pos-y (gs-player game)) ycam) 350)) ; Navbar
+        ,(pos (pos-x (gs-BOOST game)) (+ (- (pos-y (gs-player game)) ycam) 350)) ;Sets the rectangle to show the next BOOST'S x co-ordinate
+        ,(pos (pos-x (gs-EXTRALIFE game)) (+ (- (pos-y (gs-player game)) ycam) 350))
+
         ,(pos 100 (- SCENE.HEIGHT 100)) ; Steering Wheel
         
         ,(pos 50 10) ; Speed text
