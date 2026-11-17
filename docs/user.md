@@ -26,7 +26,7 @@ The user can control the car using the W,A,S,D keys of their keyboard
 
 
 The user should use these keys to avoid collisions with cars and to stay on the road, while also collecting [extra lifes](#special-features) and [boosts](#special-features)s that they come across.
-
+<br><br>
 
 When the user moves the car left or right, the steering wheel in the bottom left turns in the direction of the motion.
 
