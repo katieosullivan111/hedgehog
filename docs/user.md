@@ -31,20 +31,23 @@ The user should use these keys to avoid collisions with cars and to stay on the 
 When the user moves the car left or right, the steering wheel in the bottom left turns in the direction of the motion.
 
 <img src="/img/drivingwheel.svg" width="150" alt="steering wheel image">
+<br>
 
 ### Special Features
 
-- **Boost**:
+- <ins><b>Boost:</b></ins>
   
   ![boost image](/img/BOOST.png)
 
   By collecting the ‘boost’, the car’s speed increases instantly by 10 m/s.
 
-- **Extra life**:
+- <ins><b>Extra Life:</b></ins>
   
   ![extra life image](/img/life.png)
 
   When you collect an extra life, you get an extra life!
+<br>
+You can keep an eye out for these elements by looking at the grey naviigation bar at the top of the screen. A red rectangle represents an incoming boost, and a blue bar represents an incoming extra life.
 
 
 <br><br><br>
