@@ -40,6 +40,9 @@
 
   game))
 
+(define time-loss game
+  (set-gs-time! game (- (gs-time game 1))))
+
 ; Event Handlers
 (define (keydown game k)
   (case k
@@ -58,7 +61,7 @@
 
 ;Termination Clauses
 (define (lives-update game)
-  (set-gs-lives! game 3))
+  (when (= (gs-time 0))))
 
 (define (game-over? game)
    (if (= (gs-lives game) 0)

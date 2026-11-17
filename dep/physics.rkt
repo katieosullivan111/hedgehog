@@ -3,7 +3,6 @@
 (provide TICK-physics)
 
 ; Constants
-(define mu 0.7) ; Co-eff of friction
 (define g 9.8) ; m/s^2
 (define CAR.Cd 0.7) ; Co-eff of drag
 (define CAR.AREA 1.7) ; m^2
@@ -12,12 +11,10 @@
 (define CAR.WHEELRADIUS 0.3) ; m
 (define CAR.DRIVERATIO 6) ; Total Drive Ratio
 (define CAR.MAXRPM 20000) ; Max RPM
-(define CAR.WHEELBASE 2.7) ; m
 (define CAR.MAXSPEED (/ (* CAR.MAXRPM 2 pi CAR.WHEELRADIUS) (* 60 CAR.DRIVERATIO))) ; m/s
 
 ; Forces
 (define CAR.BRAKEPOWER (* 1.2 g CAR.MASS)) ; N
-(define friction (* mu CAR.MASS g)) ; N
 (define rolling-resistance (* 0.015 CAR.MASS g)) ; N
 (define traction (/ (* CAR.TORQUE CAR.DRIVERATIO) CAR.WHEELRADIUS)) ; N
 (define (drag v) (* 0.5 CAR.Cd CAR.AREA (sqr v))) ; N
@@ -43,7 +40,7 @@
                   (cond [(> (gs-wheel game) 0) -1] [(< (gs-wheel game) 0) 1] [else 0]) ; Wheel snap-back
                   (gs-steering game))))))) ; User steer
     ]
-    (if (and (= (gs-steering game) 0) (< (abs a) 1)) 0 a)))
+    (if (and (= (gs-steering game) 0) (< (abs a) 1)) 0 a)))     
 
 ; tick
 (define (TICK-physics game delta)

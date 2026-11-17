@@ -3,7 +3,7 @@
 #lang racket
 (require "header.rkt")
 (require 2htdp/image)
-(provide give-velocity mega mega2 AI.cars AI.images lane cars)
+(provide give-velocity mega mega2 AI.cars AI.images lane cars hlw)
 
 ;List of all vehicles
 (define AI.images (build-list 12 (lambda (i)
@@ -32,38 +32,32 @@
       [(> (pos-y (gs-player game)) -9000) 17]
       [else 19])))
 
+(define ROAD.left-lane-x (+ SCENE.HALFWIDTH (/ ROAD.WIDTH -2) (/ ROAD.WIDTH ROAD.LANES)))
 ;Creates the intial lane positions on which all NPCS are placed relative to
 (define lane
-  (list
-    (pos 200 0)
-    (pos 400 0)
-    (pos 600 0)
-    (pos 800 0)))
-
+   (for/list ([i ROAD.LANES])
+    (pos
+      (+ ROAD.left-lane-x (* (- i 1) (/ ROAD.WIDTH ROAD.LANES)))
+      -200)))
+(define hlw 70) ;half of lane-width
 ;Creates a list of random positions
 ;Uses an accumulator n to decide how many positions should be made
 ;a b c d ensure that no cars are initially placed on top of each other and place the next car a random position further than the last car,
 ;although an additional function is required to ensure the random positions dont overlap
 ;List ref will take the random number from rand-generator and run it in cond, so a random lane is selected without replacing constantly at a new lane.
-(define (sum n a b c d) 
+(define (sum n lane-count) 
   (if (<= n AI.count)
     (local [
-      (define q 600) (define e (* a q)) (define f (* b q)) (define g (* c q)) (define h (* d q))
-      (define randy (random 400))  (define r (random 4))
+      (define q 800)
+      (define y-offset (map (lambda (i) (* i q)) lane-count))
+      (define randy (random 800))  (define r (random 5))
       (define plus-or-minus
-        (if (even? r) (random 100) (- (random 100))))
+        (if (even? r) (random hlw) (- (random hlw))))
       ]
       (cons
-        (cond
-          [(= r 0) (pos (+ (pos-x (first lane)) plus-or-minus) (- (pos-y (first lane)) (+ e randy)))]
-          [(= r 1) (pos (+ (pos-x (second lane)) plus-or-minus) (- (pos-y (second lane)) (+ f randy)))]
-          [(= r 2) (pos (+ (pos-x (third lane)) plus-or-minus) (- (pos-y (third lane)) (+ g randy)))]
-          [else (pos (+ (pos-x (fourth lane)) plus-or-minus) (- (pos-y (fourth lane)) (+ h randy)))])
-        (cond
-          [(= r 0) (sum (+ n 1) (+ a 1) b c d)]
-          [(= r 1) (sum (+ n 1) a (+ b 1) c d)]
-          [(= r 2) (sum (+ n 1) a b (+ c 1) d)]
-          [else (sum (+ n 1) a b c (+ d 1))])))
+        (pos (+ (pos-x (list-ref lane r)) plus-or-minus) (- (list-ref y-offset r) randy))
+        (sum (+ n 1) (for/list ([i lane-count])
+                            (+ (list-ref lane-count i) (if (= r i) 1 0))))))
     empty))
 
 
@@ -76,7 +70,7 @@
 
 ;Creates a list of AI.count random positions
 (define mega
-  (sum 0 0 0 0 0))
+  (sum 0 (make-list ROAD.LANES 0)))
 
 ;Creates a list of AI.count vehicles
 (define mega2 (make-more-vehicles AI.images 0))
@@ -89,12 +83,15 @@
 
 ; Converts the lane positions to a pos relative to the camera to be placed in draw
 (define (cars x game)
+  (let (
+    [xcam (pos-x (gs-camera game))]
+    [ycam (pos-y (gs-camera game))])
   (if (empty? x)
     empty
     (cons
-      (pos (- (pos-x (first x)) (pos-x (gs-camera game)))
-        (- (pos-y (first x)) (pos-y (gs-camera game))))
-      (cars (rest x) game))))
+      (pos (- (pos-x (first x)) xcam)
+        (- (pos-y (first x)) ycam))
+      (cars (rest x) game)))))
 
 ; Makes the list of car struct which is passed to the initial gs-cars
 (define AI.cars (car-maker mega mega2 0))

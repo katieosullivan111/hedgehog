@@ -4,7 +4,7 @@
 (require "header.rkt")
 (require "physics.rkt")
 (require "AI.rkt")
-(provide TICK-animation draw)
+(provide TICK-animation draw ROAD.LANEOFFSET ROAD.left-lane-x)
 
 ; Value Definitions
 (define ROAD.COLOUR (make-color 096 096 096))
@@ -24,7 +24,7 @@
         (if (= (modulo i 2) 0) ROAD.STRIPE ROAD.WHITESPACE))))))
 (define ROAD.LANEOFFSET (- (/ (image-height (first ROAD.LANEIMAGES)) 2) (+ ROAD.STRIPEHEIGHT ROAD.STRIPESPACING))) ; To bring co-ordinate origin from image centre to top left
 (define ROAD.left-lane-x (+ SCENE.HALFWIDTH (/ ROAD.WIDTH -2) (/ ROAD.WIDTH ROAD.LANES)))
-
+;takes to left by dividing by minus road width and adds lane width to get across full screen
 (define SCENE.BG  (overlay ROAD (rectangle SCENE.WIDTH SCENE.HEIGHT 'solid 'green)))
 
 (define STEERINGWHEEL (scale 0.7 (bitmap "../img/drivingwheel.png")))
@@ -43,8 +43,8 @@
 (define (construct-lanes y) ; Constructs a list of positions of the lanes
   (for/list ([i (- ROAD.LANES 1)])
     (pos
-      (+ ROAD.left-lane-x (* i (/ ROAD.WIDTH ROAD.LANES)))
-      (+ y ROAD.LANEOFFSET))))
+      (+ ROAD.left-lane-x (* i (/ ROAD.WIDTH ROAD.LANES))) ;6 lanes means 1/6th of the lane
+      (+ y ROAD.LANEOFFSET)))) ;how high it should be = the offset to give it overflow
 
 (define (draw-scene imgs posns) ; Draw scene from lists of images and positions
   (foldl (lambda (img pos scene)
