@@ -17,9 +17,9 @@
   (if (empty? x)
       #false
       (if (and (<= (abs (- (pos-y (gs-player game)) (pos-y (car-pos (first x))))) 110) (<= (abs (- (pos-x (gs-player game)) (pos-x (car-pos (first x))))) 50))
-                (and (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (pos-x (gs-player game)) (+ (pos-y (gs-player game)) (crash-distance game))))
-                     (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (* (pos-y (gs-velocity game)) el))))
-                (touching-cars? (rest x) game))))
+        (and (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (pos-x (gs-player game)) (+ (pos-y (gs-player game)) (crash-distance game))))
+        (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (* (pos-y (gs-velocity game)) el))))
+        (touching-cars? (rest x) game))))
 
 ;How far the player moves after a crash depending on velocity     
 (define (crash-distance game)
@@ -130,8 +130,7 @@
       (behind? gs-BOOST game)
     (set-gs-BOOST! game (pos (interval game) (- (pos-y (gs-BOOST game)) (spawn-distance game)))))
   ;Ensures that an EXTRA-LIFE can not be obtained when the player already has 5 lives by transporting out of bounds
-  (if
-    (>= (gs-lives game) 5)
+  (if (>= (gs-lives game) 5)
     (set-gs-EXTRALIFE! game (pos 10000 (pos-y (gs-EXTRALIFE game))))
     (set-gs-EXTRALIFE! game (pos (pos-x (gs-EXTRALIFE game)) (pos-y (gs-EXTRALIFE game)))))
   ;Recycles EXTRALIFE when the player has gone past it

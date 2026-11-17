@@ -45,7 +45,7 @@
 ;a b c d ensure that no cars are initially placed on top of each other and place the next car a random position further than the last car,
 ;although an additional function is required to ensure the random positions dont overlap
 ;List ref will take the random number from rand-generator and run it in cond, so a random lane is selected without replacing constantly at a new lane.
-(define (sum n lane-count) 
+(define (sum n lane-count)
   (if (<= n AI.count)
     (local [
       (define q 800)
@@ -56,8 +56,7 @@
       ]
       (cons
         (pos (+ (pos-x (list-ref lane r)) plus-or-minus) (- (list-ref y-offset r) randy))
-        (sum (+ n 1) (for/list ([i lane-count])
-                            (+ (list-ref lane-count i) (if (= r i) 1 0))))))
+        (sum (+ n 1) (list-increment lane-count r))))
     empty))
 
 

@@ -6,14 +6,22 @@
 (define config (call-with-input-file "config.json" read-json))
 
 ; General
-(struct pos (x y) #:transparent) ; Position Structure
-(struct car (pos index) #:transparent) ; position and image index
+(struct pos (x y)) ; Position Structure
+(struct car (pos index)) ; position and image index
 (struct gs (t fps camera player velocity accelerator wheel steering lives lane-y BOOST EXTRALIFE cars) #:mutable) ; Game State
-; <number (s)> <number> <vector> <vector> <vector> <int [-1, 1]> <number (degrees)> <int [-1, 1]>
+; <number> <number> <pos> <pos> <pos> <int [-1, 1]> <number> <int [-1, 1]> <number> <number> <pos> <pos> <list<car>>
+(struct ts (heading subheading exit)) ; Title State
+; <string> <string> <boolean>
 
 ; Unit conversion
 (define (m2p m) (* m 20)) ; meters to pixels
 (define (p2m p) (/ p 20)) ; pixels to meters
+
+; Utility
+(define (list-increment lst i)
+  (if (zero? i)
+      (cons (add1 (first lst)) (rest lst))
+      (cons (first lst) (list-increment (rest lst) (sub1 i)))))
 
 ; Animation
 (define MAXFPS (hash-ref config 'max_fps))

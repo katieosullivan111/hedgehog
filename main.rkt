@@ -10,7 +10,11 @@
 (require "dep/collisions-update.rkt")
 
 ; Initialise Game State
-(define init (gs
+(define (STATE.TITLESCREEN heading) (ts 
+  heading ; heading
+  "Press SPACE to go,\n\tor ESC to quit" ; Subheading
+  #f)) ; terminate boolean
+(define (STATE.GAME) (gs
   (/ (current-inexact-milliseconds) 1000) 1 ; time and fps
   (pos 0 0) (pos SCENE.HALFWIDTH 0) (pos 0 (m2p 2)) ; camera, player, velocity vectors
   0 ; accelerator input
@@ -24,49 +28,56 @@
 
 ; Ticking and Animation
 (define (tick game)
-  (local [
-    (define now (/ (current-inexact-milliseconds) 1000))
-    (define delta (min (- now (gs-t game)) 0.1)) ; delta time between frames, limit to >= 10 fps
-  ]
-  (TICK-physics game delta)
-  (TICK-animation game)
-  
-  (collisions-update game)
+  (if (gs? game)
+    (local [
+      (define now (/ (current-inexact-milliseconds) 1000))
+      (define delta (min (- now (gs-t game)) 0.1)) ; delta time between frames, limit to >= 10 fps
+    ]
+    ; Update fps counter
+    (set-gs-t! game now)
+    (when (= (modulo (round (* now 10)) 5) 0)
+      (set-gs-fps! game (round (/ 1000 (* 1000 delta)))))
+    
+    (TICK-physics game delta)
+    (TICK-animation game)
+    
+    (collisions-update game)
+    
+    (if (= (gs-lives game) 0) (STATE.TITLESCREEN "Driving Test:\n\tFAIL!") game))
+    game)
+  )
 
-  ; Update fps counter
-  (set-gs-t! game now)
-  (when (= (modulo (round (* now 10)) 5) 0)
-    (set-gs-fps! game (round (/ 1000 (* 1000 delta)))))
-
-  game))
-
-(define time-loss game
-  (set-gs-time! game (- (gs-time game 1))))
+; (define (time-loss game)
+;   (set-gs-time! game (- (gs-time game) 1)))
 
 ; Event Handlers
 (define (keydown game k)
-  (case k
-    [("w") (set-gs-accelerator! game 1) game]
-    [("s") (set-gs-accelerator! game -1) game]
-    [("a") (set-gs-steering! game -1) game]
-    [("d") (set-gs-steering! game 1) game]
-    [else game]))
+  (if (gs? game)
+    (case k
+      [("w") (set-gs-accelerator! game 1) game]
+      [("s") (set-gs-accelerator! game -1) game]
+      [("a") (set-gs-steering! game -1) game]
+      [("d") (set-gs-steering! game 1) game]
+      [else game])
+    (case k
+      [(" ") (STATE.GAME)]
+      [("escape") (ts 0 0 #t)]
+      [else game])))
 (define (keyup game k)
-  (case k
-    [("w") (set-gs-accelerator! game 0) game]
-    [("s") (set-gs-accelerator! game 0) game]
-    [("a") (when (equal? (gs-steering game) -1) (set-gs-steering! game 0)) game]
-    [("d") (when (equal? (gs-steering game) 1) (set-gs-steering! game 0)) game]
-    [else game]))
+  (if (gs? game)
+    (case k
+      [("w") (set-gs-accelerator! game 0) game]
+      [("s") (set-gs-accelerator! game 0) game]
+      [("a") (when (equal? (gs-steering game) -1) (set-gs-steering! game 0)) game]
+      [("d") (when (equal? (gs-steering game) 1) (set-gs-steering! game 0)) game]
+      [else game])
+    game))
 
-;Termination Clauses
-(define (lives-update game)
-  (when (= (gs-time 0))))
+; Termination Clauses
+; (define (lives-update game)
+;   (when (= (gs-time 0))))
 
-(define (game-over? game)
-   (if (= (gs-lives game) 0)
-       #true
-       #false))
+(define (game-over? game) (and (ts? game) (ts-exit game)))
 
 ; Start the game
-(big-bang init [on-tick tick (/ 1 MAXFPS)] [to-draw draw] [on-key keydown] [on-release keyup] [stop-when game-over?])
+(big-bang (STATE.TITLESCREEN "Hedgehog\n\tLicence") [on-tick tick (/ 1 MAXFPS)] [to-draw draw] [on-key keydown] [on-release keyup] [stop-when game-over?])
