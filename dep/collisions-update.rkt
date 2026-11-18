@@ -50,7 +50,7 @@
                 1000))) x)])
     (let-values ([(c d) (partition (lambda (y) (< (pos-y (car-pos y)) (- (pos-y (gs-player game))
                 2500))) a)])
-    (append (add-gap b game) d (take-gap c game)))))
+    (append (add-gap b game -1) d (add-gap c game 1)))))
 
 ;This function partitions the list into cars that are not touching and cars which are, so they can de identified and adjusted
 (define (checker x game)
@@ -70,49 +70,40 @@
 ;This adjusts the difficulty depending on the players score by reducing the distance between the cars respawning and the player
 ;making traffic more cluttered
 (define (respawn-condition x game)
-    (cond
-  [(> (pos-y (gs-player game)) -10000) x]
+  (cond
+    [(> (pos-y (gs-player game)) -10000) x]
     [(<= (pos-y (gs-player game)) -10000) (* x 0.8)]
     [(<= (pos-y (gs-player game)) -20000) (* x 0.65)]
     [(<= (pos-y (gs-player game)) -30000)  (* x 0.55)]
     [else (* x 0.45)]))
 
-;Gives cars which need to be recycled a new pos in front of the player
- (define (add-gap x game)
-   (local
-     [(define r (random 5)) (define plus-or-minus (if (even? r)
-   (random hlw)
-   (- (random hlw))))]
-   (if (empty? x)
-       empty
-       (cons (car (pos (+ (pos-x (list-ref lane r)) plus-or-minus) (- (pos-y (gs-player game))  (+ (random 500) (respawn-condition 1000 game)))) (list-ref mega2 (random 11))) (add-gap (rest x) game)))))
+; Gives cars which need to be recycled a new pos in front of the player
+ (define (add-gap x game direction) ; direction -1 for in front, +1 for behind player
+  (local [
+    (define r (random ROAD.LANES))
+    (define x-offset (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 35)))]
+    (if (empty? x)
+      empty
+      (cons
+        (car (pos (+ (list-ref AI.LANEX r) x-offset) (+ (pos-y (gs-player game)) (* (+ (random 500) (respawn-condition 1000 game)) direction))) (list-ref AI.images (random AI.imagecount)))
+        (add-gap (rest x) game direction)))))
 
-;This function give cars which need to be recycled a new pos behind the player
-(define (take-gap x game)
-(local  
-[(define r (random 5)) (define plus-or-minus (if (even? r)
-   (random hlw)
-   (- (random hlw))))]
-   (if (empty? x)
-       empty
-       (cons (car (pos (+ (pos-x (list-ref lane r)) plus-or-minus) (+ (pos-y (gs-player game)) (+ (random 500) (respawn-condition 1000 game)))) (list-ref mega2 (random 11))) (take-gap (rest x) game)))))
-
-;How far ahead the cars spawn depending on velocity
+; How far ahead the cars spawn depending on velocity
 (define (spawn-distance game)
   (cond
     [(< (pos-y (gs-velocity game)) 50) (+ (random 100) 1800)]
-    [ (< (pos-y (gs-velocity game)) 100) (+ (random 100) 2500)]
+    [(< (pos-y (gs-velocity game)) 100) (+ (random 100) 2500)]
     [(< (pos-y (gs-velocity game)) 150) (+ (random 100) 3500)]
     [(> (pos-y (gs-velocity game)) 150) (+ (random 100) 4500)]))
 
 ;Returns a pos-x which a random pos is built on for cars and items, min 100 and max 900 keeps it in bounds of the lane
 (define (interval game)
-   (+ (random (- ROAD.WIDTH (* 2 ROAD.left-lane-x))) ROAD.left-lane-x))
+   (+ (random ROAD.WIDTH) (first AI.LANEX)))
 
 ;Collisions with cars and objects which affect the gs
-(define (collisions-update game)
+(define (collisions-update game delta)
   ;Sets the cars game-state to a new list which checks whether cars which have velocity are behind, essentially keeping track of updated positions so that it can be passed to collisions
- (set-gs-cars! game (give-velocity (keep-cars? (checker (gs-cars game) game) game) game))
+ (set-gs-cars! game (give-velocity (keep-cars? (checker (gs-cars game) game) game) game delta))
   ;Controls collisions with other cars
  (touching-cars? (gs-cars game) game)
   ;Adds velocity when a player hits a boost

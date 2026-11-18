@@ -41,7 +41,7 @@
     (TICK-physics game delta)
     (TICK-animation game)
     
-    (collisions-update game)
+    (collisions-update game delta)
     
     (if (= (gs-lives game) 0) (STATE.TITLESCREEN "Driving Test:\n\tFAIL!") game))
     game)

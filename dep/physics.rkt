@@ -49,16 +49,17 @@
   (local [
     (define xspeed (m2p (gs-wheel game)))
     (define yspeed (pos-y (gs-velocity game)))
-    (define newyspeed (max 0 (+ yspeed (m2p (* (/ (netforce (p2m yspeed) (gs-accelerator game) delta) CAR.MASS) delta)))))]
+    (define a (/ (netforce (p2m yspeed) (gs-accelerator game) delta) CAR.MASS)) ; Acceleration
+    (define newyspeed (max 0 (+ yspeed (m2p (* a delta)))))]
     (set-gs-velocity! game (pos xspeed newyspeed))
 
     ; Update Position
     (set-gs-player! game
     (pos
       (+ (pos-x (gs-player game)) (* xspeed delta))
-      (- (pos-y (gs-player game)) (* newyspeed delta)))))
+      (- (pos-y (gs-player game)) (* newyspeed delta))))
 
   ; Camera update
   (set-gs-camera! game (pos 0 (- (pos-y (gs-player game)) SCENE.CAMERAHEIGHT)))
-  game
+  game)
 )

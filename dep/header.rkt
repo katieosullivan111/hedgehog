@@ -18,10 +18,10 @@
 (define (p2m p) (/ p 20)) ; pixels to meters
 
 ; Utility
-(define (list-increment lst i)
+(define (list-increment list i) ; Increments i-th term in list by 1
   (if (zero? i)
-      (cons (add1 (first lst)) (rest lst))
-      (cons (first lst) (list-increment (rest lst) (sub1 i)))))
+    (cons (add1 (first list)) (rest list))
+    (cons (first list) (list-increment (rest list) (sub1 i)))))
 
 ; Animation
 (define MAXFPS (hash-ref config 'max_fps))
@@ -33,10 +33,14 @@
 (define SCENE.HALFWIDTH (/ SCENE.WIDTH 2))
 (define SCENE.CAMERAHEIGHT (- SCENE.HEIGHT 150))
 
-(define ROAD.LANES 5)
+(define ROAD.LANES 7)
 (define ROAD.STRIPESPACING 150)
 (define ROAD.STRIPEHEIGHT 50)
 (define ROAD.STRIPES/LANE (quotient SCENE.HEIGHT ROAD.STRIPESPACING))
+
+(define ROAD.STRIPEX
+   (for/list ([i (- ROAD.LANES 1)])
+      (+ SCENE.HALFWIDTH (/ ROAD.WIDTH -2) (/ ROAD.WIDTH ROAD.LANES) (* i (/ ROAD.WIDTH ROAD.LANES)))))
 
 ; AI
 (define AI.count (hash-ref config 'npc-count))
