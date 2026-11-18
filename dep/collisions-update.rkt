@@ -48,7 +48,7 @@
       empty
       (cons (car (pos (pos-x (car-pos (first x))) (- (pos-y (car-pos (first x))) 100)) (car-speed (first x)) (car-index (first x))) (add-small-gap (rest x) game))))
 
-; Gives cars which need to be recycled a new pos in front of the player
+; Recycles cars out of range
  (define (add-gap x game direction) ; direction -1 for in front, +1 for behind player
   (local [
     (define r (random ROAD.LANES))
@@ -56,16 +56,8 @@
     (if (empty? x)
       empty
       (cons
-        (car (pos (+ (list-ref AI.LANEX r) x-offset) (+ (pos-y (gs-player game)) (* (+ (random 500) 1000) direction))) (m2p 35) (random AI.imagecount))
+        (car (pos (+ (list-ref AI.LANEX r) x-offset) (+ (pos-y (gs-player game)) (+ (random 500) (* (+ SCENE.HEIGHT (pos-y (gs-velocity game))) direction)))) (m2p 35) (random AI.imagecount))
         (add-gap (rest x) game direction)))))
-
-; How far ahead the collectibles spawn depending on velocity
-(define (spawn-distance game)
-  (cond
-    [(< (pos-y (gs-velocity game)) 50) (+ (random 100) 1800)]
-    [(< (pos-y (gs-velocity game)) 100) (+ (random 100) 2500)]
-    [(< (pos-y (gs-velocity game)) 150) (+ (random 100) 3500)]
-    [else (+ (random 100) 4500)]))
 
 ; Returns a random x value within the bounds of the road
 (define (interval) (+ (random ROAD.WIDTH) (first AI.LANEX)))
@@ -73,20 +65,31 @@
 ;Collisions with cars and objects which affect the gs
 (define (collisions-update game delta)
   (local [
+    ; Constants
+    (define r (gs-player game))
+    (define v (gs-velocity game))
+
+    (define (spawn-distance v) ; How far ahead the collectibles spawn depending on velocity
+      (cond
+        [(< v 50) (+ (random 100) 1800)]
+        [(< v 100) (+ (random 100) 2500)]
+        [(< v 150) (+ (random 100) 3500)]
+        [else (+ (random 100) 4500)]))
+
     (define (update-cars cars game delta)
       (if (empty? cars)
         empty
         (let*
           ([npc (first cars)] [v-car (car-speed npc)]
           [x-car (pos-x (car-pos npc))] [y-car (pos-y (car-pos npc))]
-          [x (pos-x (gs-player game))] [y (pos-y (gs-player game))])
+          [x (pos-x r)] [y (pos-y r)])
 
           (cons
             (car
               (pos x-car (- y-car (* v-car delta))) ; Updated npc position
               ; Re-calculate npc speed if collides with player
               (if (and (<= (abs (- y y-car)) 110) (<= (abs (- x x-car)) 50))
-                (let* ([vx (pos-x (gs-velocity game))] [vy (pos-y (gs-velocity game))]
+                (let* ([vx (pos-x v)] [vy (pos-y v)]
                   [e*v-relative (* CAR.E (- vy v-car))] ; (Co-eff of Restituion)(Relative V)
                   [v-total (+ vy v-car)]) ; Sum of original car and player v
 
@@ -108,17 +111,17 @@
     (set-gs-cars! game (update-cars (keep-cars? (checker (gs-cars game) game) game) game delta))
 
     ; Handle Boost and Extra-time items
-    (when (touching? (gs-BOOST game) (gs-player game))
+    (when (touching? (gs-BOOST game) r)
       (set-gs-BOOST! game (pos (interval) (- (pos-y (gs-BOOST game)) (+ (random 1000) 2000))))
-      (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (+ (pos-y (gs-velocity game)) 200))))
-    (when (touching? (gs-EXTRALIFE game) (gs-player game))
+      (set-gs-velocity! game (pos (pos-x v) (+ (pos-y v) 200))))
+    (when (touching? (gs-EXTRALIFE game) r)
       (set-gs-EXTRALIFE! game (pos (interval) (- (pos-y (gs-EXTRALIFE game)) (+ (random 5000) 10000))))
       (set-gs-deadline! game (+ (gs-deadline game) 2000)))
 
     ; Recyclyes items when out of bounds
     (when (behind? gs-BOOST game)
-      (set-gs-BOOST! game (pos (interval) (- (pos-y (gs-BOOST game)) (spawn-distance game)))))
+      (set-gs-BOOST! game (pos (interval) (- (pos-y (gs-BOOST game)) (spawn-distance (pos-y v))))))
     (when (behind? gs-EXTRALIFE game)
-      (set-gs-EXTRALIFE! game (pos (interval) (- (pos-y (gs-EXTRALIFE game)) (spawn-distance game)))))
+      (set-gs-EXTRALIFE! game (pos (interval) (- (pos-y (gs-EXTRALIFE game)) (spawn-distance (pos-y v))))))
 
     game))

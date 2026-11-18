@@ -57,11 +57,13 @@
 
 (define (draw game)
   (if (gs? game)
-    (let (
+    (let* (
       [xcam (pos-x (gs-camera game))]
       [ycam (pos-y (gs-camera game))]
       [x (pos-x (gs-player game))]
-      [y (pos-y (gs-player game))])
+      [y (pos-y (gs-player game))]
+      [countdown-raw (/ (round (/ (- (gs-deadline game) (gs-t game)) 100)) 10)]
+      [countdown (round countdown-raw)])
       (draw-scene
         `( ; Last item in list is on top
           ; Road
@@ -88,7 +90,7 @@
 
           ,HEART
           ,(text (number->string (gs-lives game)) 70 'white) ; Lives
-          ,(text (string-append (number->string (round (/ (- (gs-deadline game) (gs-t game)) 1000))) " s") 32 'green) ; Countdown
+          ,(text (string-append (number->string (if (<= countdown 10) countdown-raw countdown)) " s") (if (<= countdown 3) 50 32) (if (<= countdown 3) 'red 'green)) ; Countdown
         )
         `(
           ; Road

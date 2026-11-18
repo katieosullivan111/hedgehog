@@ -49,11 +49,10 @@
     [vx (pos-x (gs-velocity game))]
     [bound-l (- SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)] [bound-r (+ SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)])
 
-    (cond
-      [(< x bound-l) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (+ bound-l 20) y))
-        (set-gs-wheel! game (p2m (- vx)))]
-      [(> x bound-r) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (- bound-r 20) y))
-        (set-gs-wheel! game (p2m (- vx)))])))
+    (when (or (< x bound-l) (> x bound-r))
+      (set-gs-lives! game (- (gs-lives game) 1)) ; Reduce lives
+      ; (set-gs-player! game (pos (+ bound-l 20) y))
+      (set-gs-wheel! game (p2m (- vx)))))) ; Rebound
 
 ; tick
 (define (TICK-physics game delta)
