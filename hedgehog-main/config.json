@@ -1,0 +1,9 @@
+{
+    "max_fps": 120,
+    "resolution":
+    {
+        "width": 1200,
+        "height": 800
+    },
+    "npc-count": 15
+}
