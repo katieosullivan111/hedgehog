@@ -3,7 +3,7 @@
 #lang racket
 (require "header.rkt")
 (require 2htdp/image)
-(provide mega mega2 AI.cars AI.images AI.imagecount cars AI.LANEX)
+(provide AI.cars AI.images AI.imagecount cars AI.LANEX)
 
 ;List of all vehicles
 (define AI.imagecount 12)
@@ -20,43 +20,30 @@
 (define (speed game delta)
   (* delta (pos-y (gs-velocity game)) 0.8))
 
-; Creates a list of random positions
-; Uses an accumulator n to decide how many positions should be made
-; a b c d ensure that no cars are initially placed on top of each other and place the next car a random position further than the last car,
-; although an additional function is required to ensure the random positions dont overlap
-; List ref will take the random number from rand-generator and run it in cond, so a random lane is selected without replacing constantly at a new lane.
-(define (sum n lane-count)
+; Creates a list of n random positions of cars
+(define (make-car-pos n no./lane) ; no./lane = no. of cars per lane <list>
   (if (< n AI.count)
-    (local [
-      (define q 800)
-      (define y-offset (map (lambda (i) (* i q)) lane-count))
-      (define randy (random 500)) (define r (random ROAD.LANES))
-      (define x-offset (+ 35 (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 70))))
-      ]
+    (let* (
+      [base-split 800] ; base separation between cars
+      [lane (random ROAD.LANES)] ; lane index of this car
+      [y-offset (* (list-ref no./lane lane) base-split)]
+      [randy (random 500)] ; Randomiser to alter distance between cars
+      [x-offset (+ 35 (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 70)))] ; horizontal offset from default lane position
+    )
       (cons
-        (pos (+ (list-ref AI.LANEX r) x-offset) (- (list-ref y-offset r) randy))
-        (sum (+ n 1) (list-increment lane-count r))))
+        (pos (+ (list-ref AI.LANEX lane) x-offset) (- y-offset randy))
+        (make-car-pos (+ n 1) (list-increment no./lane lane))))
     empty))
 
-
-; Makes a list of 30 images to match the positions
-; When the list is empty it appends the full list, until the total length is 81
-(define (make-car-images x g)
-  (if (< g AI.count)
-    (cons (random AI.imagecount) (make-car-images x (+ g 1)))
+(define (make-car-images x i) ; Generates list of i image indexes
+  (if (< i AI.count)
+    (cons (random AI.imagecount) (make-car-images x (+ i 1)))
     empty))
-
-; Creates a list of AI.count random positions
-(define mega
-  (sum 0 (make-list ROAD.LANES 0)))
-
-; Creates a list of AI.count vehicles
-(define mega2 (make-car-images AI.images 0))
 
 ; Converts the lists of random positions and images to random car structs
-(define (car-maker x y n)
-  (if (< n AI.count)
-    (cons (car (first x) (m2p 35) (first y)) (car-maker (rest x) (rest y) (+ n 1)))
+(define (car-maker x y i)
+  (if (< i AI.count)
+    (cons (car (first x) (m2p 35) (first y)) (car-maker (rest x) (rest y) (+ i 1)))
     empty))
 
 ; Converts the lane positions to a pos relative to the camera to be placed in draw
@@ -72,4 +59,8 @@
       (cars (rest x) game)))))
 
 ; Makes the list of car struct which is passed to the initial gs-cars
-(define (AI.cars) (car-maker mega mega2 0))
+(define (AI.cars) (local [
+  (define (create-pos-list) (make-car-pos 0 (make-list ROAD.LANES 0))) ; Creates a list of AI.count random positions
+  (define (create-image-list) (make-car-images AI.images 0))] ; Creates a list of AI.count vehicles
+
+  (car-maker (create-pos-list) (create-image-list) 0)))

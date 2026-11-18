@@ -23,8 +23,8 @@
   0 0 ; wheel rotation and steering input
   3 ; lives
   0 ; lane-y
-  (pos (interval) (+ (random 800) 100)) ; BOOST
-  (pos (interval) (+ (random 800) 100)) ; EXTRALIFE
+  (pos -50 0) ; BOOST
+  (pos -50 0) ; EXTRALIFE
   (AI.cars) ; list of cars
 ))
 
@@ -47,6 +47,7 @@
           (+ (pos-x (gs-player game)) (* delta-s 1000))
           (- (pos-y (gs-player game)) (* delta-s 1000))))
         (set-gs-spin! game (+ (gs-spin game) (* delta-s 1000)))
+        (set-gs-deadline! game now)
         (if (< (pos-x (gs-player game)) SCENE.WIDTH)
           game
           (STATE.TITLESCREEN "Driving Test:\n\tFAIL!")))

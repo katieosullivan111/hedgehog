@@ -93,8 +93,11 @@
                   ; Applying Principle of Conservation of Momentum, Newton's Restitution dynamics, vy = 0.5(v-tot - e*v-r), v-car = 0.5(v-tot + e*v-r)
                   (set-gs-velocity! game (pos vx (/ (- v-total e*v-relative) 2)))
 
+                  ; Rebound player horizontally
+                  (set-gs-wheel! game (* (- x x-car) 0.5)) ; .5 dampening effect
+
                   (set-gs-lives! game (- (gs-lives game) 1))
-                  (set-gs-player! game (pos x (+ y 10)))
+                  (set-gs-player! game (pos x (+ y (* 10 (if (< vy v-car) -1 1)))))
 
                   ; Return value: NPC's speed
                   (/ (+ v-total e*v-relative) 2))

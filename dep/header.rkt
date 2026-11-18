@@ -44,6 +44,5 @@
 
 ; Physics & AI
 (define CAR.E 0.7) ; Co-efficient of Restitution between player and other cars
-(define CAR.MAXSTEER 30) ; Max Steering Angle (degrees)
 (define AI.HEADSTART (m2p (- 50))) ; AI doesn't spawn until player has traveled 100m
 (define AI.count (round (* SCENE.HEIGHT 0.01 (hash-ref config 'traffic-density)))) ; traffic-density = #traffic per 100 pixels

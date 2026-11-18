@@ -32,8 +32,9 @@
 (define CAR.WIDTH (m2p 2))
 (define CAR.LENGTH (m2p 5))
 
+(define HEART (scale 0.15 (bitmap "../img/life.png")))
 (define BOOST (bitmap "../img/BOOST.png"))
-(define EXTRALIFE (bitmap "../img/life.png"))
+(define EXTRALIFE (bitmap "../img/time.png"))
 (define NAVIGATION-BAR (rectangle 800 8 'solid 'grey))
 (define BOOST-BAR (rectangle 20 8 'solid 'red))
 (define LIFE-BAR (rectangle 20 8 'solid 'blue))
@@ -84,8 +85,9 @@
           ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 16 'red) ; Speed text
           ,(text (string-append "Score: " (number->string (round (p2m (- y))))) 16 'red) ; Score text
           ,(text (string-append (number->string (gs-fps game)) " FPS") 16 'red) ; FPS
-          ,(text (string-append "Lives: " (number->string (gs-lives game))) 18 'blue) ; Lives
 
+          ,HEART
+          ,(text (number->string (gs-lives game)) 70 'white) ; Lives
           ,(text (string-append (number->string (round (/ (- (gs-deadline game) (gs-t game)) 1000))) " s") 32 'green) ; Countdown
         )
         `(
@@ -115,7 +117,9 @@
           ,(pos 50 10) ; Speed text
           ,(pos 50 25) ; Score text
           ,(pos 50 40) ; FPS
-          ,(pos 50 70) ; Lives
+
+          ,(pos (- SCENE.WIDTH 100) 100) ; Heart
+          ,(pos (- SCENE.WIDTH 100) 105) ; Lives
 
           ,(pos SCENE.HALFWIDTH 50) ; Countdown
         )

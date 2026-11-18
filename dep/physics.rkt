@@ -24,6 +24,7 @@
     (if (> v 0) (- 0 (if (= a -1) CAR.BRAKEPOWER 0) rolling-resistance (drag v)) (/ (* v CAR.MASS -1) d)))) ; N
 
 ; Mechanics
+(define CAR.MAXSTEER 30) ; Max Steering Angle (degrees)
 (define (steer-omega d) (* 50 d)) ; Steering angular velocity (degrees/second)
 (define (steer-wheel game delta)
   (local [
@@ -44,13 +45,15 @@
 ; Ensures player stays on the road
 (define (check-player-bounds game)
   (let
-    ([x (pos-x (gs-player game))] [y (pos-y (gs-player game))] [bound-l (- SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)] [bound-r (+ SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)])
+    ([x (pos-x (gs-player game))] [y (pos-y (gs-player game))]
+    [vx (pos-x (gs-velocity game))]
+    [bound-l (- SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)] [bound-r (+ SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)])
 
     (cond
       [(< x bound-l) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (+ bound-l 20) y))
-        (set-gs-wheel! game CAR.MAXSTEER)]
+        (set-gs-wheel! game (p2m (- vx)))]
       [(> x bound-r) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (- bound-r 20) y))
-        (set-gs-wheel! game (- CAR.MAXSTEER))])))
+        (set-gs-wheel! game (p2m (- vx)))])))
 
 ; tick
 (define (TICK-physics game delta)
