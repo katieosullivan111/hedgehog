@@ -2,8 +2,8 @@
     "max_fps": 120,
     "resolution":
     {
-        "width": 1999,
+        "width": 999,
         "height": 1200
     },
-    "npc-count": 15
+    "traffic-density": 1
 }

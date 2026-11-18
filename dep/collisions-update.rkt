@@ -4,28 +4,12 @@
 (require racket/list)
 (provide collisions-update interval)
 
-(define el 0.7) ; energy loss
-
 ;Checks if the car is touching an object
 (define (touching? pos1 pos2)
   (let ([range-x 60] [range-y 90]
     [x1 (pos-x pos1)] [y1 (pos-y pos1)]
     [x2 (pos-x pos2)] [y2 (pos-y pos2)])
     (and (<= (abs (- x1 x2)) range-x) (<= (abs (- y1 y2)) range-y))))
-
-;Checks whether car is touching any npcs
-(define (touching-cars? cars game)
-  (if (empty? cars)
-    #false
-    (let ([car-x (pos-x (car-pos (first cars)))] [car-y (pos-y (car-pos (first cars)))]
-      [x (pos-x (gs-player game))] [y (pos-y (gs-player game))])
-      (if (and (<= (abs (- y car-y)) 110) (<= (abs (- x car-x)) 50))
-        (begin
-          (set-gs-lives! game (- (gs-lives game) 1))
-          (set-gs-player! game (pos x (+ y 20)))
-          (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (* (pos-y (gs-velocity game)) el)))
-          (set-gs-accelerator! game -1))
-        (touching-cars? (rest cars) game)))))
 
 ;How far the player moves after a crash depending on velocity     
 (define (crash-distance game)
@@ -46,7 +30,7 @@
             
 ;This function checks whether game-state objects like BOOST or EXTRALIFE are too far behind the player so that they can be recycled
 (define (behind? p game)
-  (< (- (pos-y (gs-player game)) (pos-y (p game))) -500))
+  (< (pos-y (gs-player game)) (- (pos-y (p game)) 300)))
 
 ; This function splits the list of NPCS into three: whether they are within a reasonable distance of the player, whether we have passed them or whether they are too far in front. Add-gap then takes the list
 ; of cars which are too far behind, takes their pos and converts it to one in front and then it is appended back onto to the list of cars within a reasonable distance to the player
@@ -81,16 +65,6 @@
       empty
       (cons (car (pos (pos-x (car-pos (first x))) (- (pos-y (car-pos (first x))) 100)) (car-speed (first x)) (car-index (first x))) (add-small-gap (rest x) game))))
 
-;This adjusts the difficulty depending on the players score by reducing the distance between the cars respawning and the player
-;making traffic more cluttered
-(define (respawn-condition x game)
-  (cond
-    [(> (pos-y (gs-player game)) -10000) x]
-    [(<= (pos-y (gs-player game)) -10000) (* x 0.8)]
-    [(<= (pos-y (gs-player game)) -20000) (* x 0.65)]
-    [(<= (pos-y (gs-player game)) -30000)  (* x 0.55)]
-    [else (* x 0.45)]))
-
 ; Gives cars which need to be recycled a new pos in front of the player
  (define (add-gap x game direction) ; direction -1 for in front, +1 for behind player
   (local [
@@ -99,52 +73,69 @@
     (if (empty? x)
       empty
       (cons
-        (car (pos (+ (list-ref AI.LANEX r) x-offset) (+ (pos-y (gs-player game)) (* (+ (random 500) (respawn-condition 1000 game)) direction))) (m2p 35) (random AI.imagecount))
+        (car (pos (+ (list-ref AI.LANEX r) x-offset) (+ (pos-y (gs-player game)) (* (+ (random 500) 1000) direction))) (m2p 35) (random AI.imagecount))
         (add-gap (rest x) game direction)))))
 
-; How far ahead the cars spawn depending on velocity
+; How far ahead the collectibles spawn depending on velocity
 (define (spawn-distance game)
   (cond
     [(< (pos-y (gs-velocity game)) 50) (+ (random 100) 1800)]
     [(< (pos-y (gs-velocity game)) 100) (+ (random 100) 2500)]
     [(< (pos-y (gs-velocity game)) 150) (+ (random 100) 3500)]
-    [(> (pos-y (gs-velocity game)) 150) (+ (random 100) 4500)]))
+    [else (+ (random 100) 4500)]))
 
-;Returns a pos-x which a random pos is built on for cars and items, min 100 and max 900 keeps it in bounds of the lane
-(define (interval)
-   (+ (random ROAD.WIDTH) (first AI.LANEX)))
+; Returns a random x value within the bounds of the road
+(define (interval) (+ (random ROAD.WIDTH) (first AI.LANEX)))
 
 ;Collisions with cars and objects which affect the gs
 (define (collisions-update game delta)
-  ;Sets the cars game-state to a new list which checks whether cars which have velocity are behind, essentially keeping track of updated positions so that it can be passed to collisions
-  (set-gs-cars! game (give-velocity (keep-cars? (checker (gs-cars game) game) game) game delta))
+  (local [
+    (define (update-cars cars game delta)
+      (if (empty? cars)
+        empty
+        (let*
+          ([npc (first cars)] [v-car (car-speed npc)]
+          [x-car (pos-x (car-pos npc))] [y-car (pos-y (car-pos npc))]
+          [x (pos-x (gs-player game))] [y (pos-y (gs-player game))])
 
-  ; Controls collisions with other cars
-  (touching-cars? (gs-cars game) game)
+          (cons
+            (car
+              (pos x-car (- y-car (* v-car delta))) ; Updated npc position
+              ; Re-calculate npc speed if collides with player
+              (if (and (<= (abs (- y y-car)) 110) (<= (abs (- x x-car)) 50))
+                (let* ([vx (pos-x (gs-velocity game))] [vy (pos-y (gs-velocity game))]
+                  [e*v-relative (* CAR.E (- vy v-car))] ; (Co-eff of Restituion)(Relative V)
+                  [v-total (+ vy v-car)]) ; Sum of original car and player v
 
-  ;Adds velocity when a player hits a boost
-  (when (touching? (gs-BOOST game) (gs-player game))
-    (set-gs-BOOST! game (pos (interval) (- (pos-y (gs-BOOST game)) (+ (random 1000) 2000))))
-    (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (+ (pos-y (gs-velocity game)) 200))))
+                  ; Applying Principle of Conservation of Momentum, Newton's Restitution dynamics, vy = 0.5(v-tot - e*v-r), v-car = 0.5(v-tot + e*v-r)
+                  (set-gs-velocity! game (pos vx (/ (- v-total e*v-relative) 2)))
 
-  ; Adds an extra life to the gs when the player hits an extra life
-  (when (touching? (gs-EXTRALIFE game) (gs-player game))
-    (set-gs-EXTRALIFE! game (pos (interval) (- (pos-y (gs-EXTRALIFE game)) (+ (random 5000) 10000))))
-    (set-gs-deadline! game (+ (gs-deadline game) 2000)))
+                  (set-gs-lives! game (- (gs-lives game) 1))
+                  (set-gs-player! game (pos x (+ y 10)))
 
-  ; Keeps the player inside the leftmost lane and rightmost lane and deducts a life for crossing them
-  (out-of-bounds game)
+                  ; Return value: NPC's speed
+                  (/ (+ v-total e*v-relative) 2))
+                v-car)
+              (car-index npc))
+            (update-cars (rest cars) game delta)))))
+  ]
+    (set-gs-cars! game (update-cars (keep-cars? (checker (gs-cars game) game) game) game delta))
 
-  ; Recyclyes BOOST when the player has gone past it
-  (when (behind? gs-BOOST game)
-    (set-gs-BOOST! game (pos (interval) (- (pos-y (gs-BOOST game)) (spawn-distance game)))))
+    ; Handle Boost and Extra-time items
+    (when (touching? (gs-BOOST game) (gs-player game))
+      (set-gs-BOOST! game (pos (interval) (- (pos-y (gs-BOOST game)) (+ (random 1000) 2000))))
+      (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (+ (pos-y (gs-velocity game)) 200))))
+    (when (touching? (gs-EXTRALIFE game) (gs-player game))
+      (set-gs-EXTRALIFE! game (pos (interval) (- (pos-y (gs-EXTRALIFE game)) (+ (random 5000) 10000))))
+      (set-gs-deadline! game (+ (gs-deadline game) 2000)))
 
-  ; Ensures that an EXTRA-LIFE can not be obtained when the player already has 5 lives by transporting out of bounds
-  (if (>= (gs-lives game) 5)
-    (set-gs-EXTRALIFE! game (pos 10000 (pos-y (gs-EXTRALIFE game))))
-    (set-gs-EXTRALIFE! game (pos (pos-x (gs-EXTRALIFE game)) (pos-y (gs-EXTRALIFE game)))))
+    ; Keeps the player inside the leftmost lane and rightmost lane and deducts a life for crossing them
+    (out-of-bounds game)
 
-  ; Recycles EXTRALIFE when the player has gone past it
+    ; Recyclyes items when out of bounds
+    (when (behind? gs-BOOST game)
+      (set-gs-BOOST! game (pos (interval) (- (pos-y (gs-BOOST game)) (spawn-distance game)))))
     (when (behind? gs-EXTRALIFE game)
       (set-gs-EXTRALIFE! game (pos (interval) (- (pos-y (gs-EXTRALIFE game)) (spawn-distance game)))))
-  game)
+
+    game))

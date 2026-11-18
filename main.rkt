@@ -24,7 +24,7 @@
   0 ; lane-y
   (pos (interval) (+ (random 800) 100)) ; BOOST
   (pos (interval) (+ (random 800) 100)) ; EXTRALIFE
-  AI.cars ; list of cars
+  (AI.cars) ; list of cars
 ))
 
 ; Ticking and Animation
@@ -42,7 +42,7 @@
     (TICK-physics game (/ delta 1000))
     (TICK-animation game)
     
-    (collisions-update game (/ delta 1000))
+    (when (< (pos-y (gs-player game)) AI.HEADSTART) (collisions-update game (/ delta 1000)))
     
     (if (or (timeout? game) (= (gs-lives game) 0)) (STATE.TITLESCREEN "Driving Test:\n\tFAIL!") game))
     game)

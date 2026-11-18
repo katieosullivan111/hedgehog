@@ -3,7 +3,7 @@
 #lang racket
 (require "header.rkt")
 (require 2htdp/image)
-(provide give-velocity mega mega2 AI.cars AI.images AI.imagecount cars AI.LANEX)
+(provide mega mega2 AI.cars AI.images AI.imagecount cars AI.LANEX)
 
 ;List of all vehicles
 (define AI.imagecount 12)
@@ -16,16 +16,6 @@
 (define AI.LANEX
   (for/list ([i ROAD.LANES])
     (+ SCENE.HALFWIDTH (/ ROAD.WIDTH -2) (* i (/ ROAD.WIDTH ROAD.LANES)))))
-
-;This function takes the list of NPCS and changes their positions to have constant velocity, which is proportional to the player's distance/score
-(define (give-velocity x game delta)
-  (if (empty? x)
-      empty
-      (cons (car (pos (pos-x (car-pos (first x)))
-        (- (pos-y (car-pos (first x))) (speed game delta)))
-        (car-speed (first x))
-        (car-index (first x)))
-        (give-velocity (rest x) game delta))))
 
 (define (speed game delta)
   (* delta (pos-y (gs-velocity game)) 0.8))
@@ -40,7 +30,7 @@
     (local [
       (define q 800)
       (define y-offset (map (lambda (i) (* i q)) lane-count))
-      (define randy (random 800)) (define r (random ROAD.LANES))
+      (define randy (random 500)) (define r (random ROAD.LANES))
       (define x-offset (+ 35 (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 70))))
       ]
       (cons
@@ -82,4 +72,4 @@
       (cars (rest x) game)))))
 
 ; Makes the list of car struct which is passed to the initial gs-cars
-(define AI.cars (car-maker mega mega2 0))
+(define (AI.cars) (car-maker mega mega2 0))

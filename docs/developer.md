@@ -140,13 +140,15 @@ The games difficulty automatically increases over time. As the game progresses, 
 
 The AI speed also grows with time, making it dangerous for the player’s speed to drop as cars could spawn suddenly from behind.
 
-```(define (respawn-condition x game)
-    (cond
-  [(> (pos-y (gs-player game)) -10000) x]
+```
+(define (respawn-condition x game)
+  (cond
+    [(> (pos-y (gs-player game)) -10000) x]
     [(and (<= (pos-y (gs-player game)) -10000) (> (pos-y (gs-player game)) -20000)) (* x 0.8)]
     [(and (<= (pos-y (gs-player game)) -20000) (> (pos-y (gs-player game)) -30000)) (* x 0.65)]
-    [(and (<= (pos-y (gs-player game)) -30000) (> (pos-y (gs-player game)) -40000)) (* x 0.55)]```
+    [(and (<= (pos-y (gs-player game)) -30000) (> (pos-y (gs-player game)) -40000)) (* x 0.55)]
     [else (* x 0.45)]))
+```
 
 The game state list of AI is updated each tick, with gs-cars being set to a list which gives velocity to a list which checks if the AI are in bound and finally to a list which checks if the AI are touching or not.
 

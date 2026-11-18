@@ -58,7 +58,9 @@
   (if (gs? game)
     (let (
       [xcam (pos-x (gs-camera game))]
-      [ycam (pos-y (gs-camera game))])
+      [ycam (pos-y (gs-camera game))]
+      [x (pos-x (gs-player game))]
+      [y (pos-y (gs-player game))])
       (draw-scene
         `( ; Last item in list is on top
           ; Road
@@ -68,7 +70,7 @@
           ,BOOST
           ,EXTRALIFE
 
-          ,@(map (lambda (i) (hash-ref AI.images (car-index i))) (gs-cars game))
+          ,@(if (< y AI.HEADSTART) (map (lambda (i) (hash-ref AI.images (car-index i))) (gs-cars game)) empty)
 
           ,CAR
 
@@ -80,7 +82,7 @@
           ,(rotate (* (gs-wheel game) -9) STEERINGWHEEL)
 
           ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 16 'red) ; Speed text
-          ,(text (string-append "Score: " (number->string (round (p2m (- (pos-y (gs-player game))))))) 16 'red) ; Score text
+          ,(text (string-append "Score: " (number->string (round (p2m (- y))))) 16 'red) ; Score text
           ,(text (string-append (number->string (gs-fps game)) " FPS") 16 'red) ; FPS
           ,(text (string-append "Lives: " (number->string (gs-lives game))) 18 'blue) ; Lives
 
@@ -94,12 +96,14 @@
           ,(pos (- (pos-x (gs-BOOST game)) xcam) (- (pos-y (gs-BOOST game)) ycam)) ; Boost
           ,(pos (- (pos-x (gs-EXTRALIFE game)) xcam) (- (pos-y (gs-EXTRALIFE game)) ycam)) ; Extralife
 
-          ,@(map
-            (lambda (car)
-              (pos (pos-x (car-pos car)) (- (pos-y (car-pos car)) ycam)))
-            (gs-cars game))
+          ,@(if (< y AI.HEADSTART)
+            (map
+              (lambda (car)
+                (pos (pos-x (car-pos car)) (- (pos-y (car-pos car)) ycam)))
+              (gs-cars game))
+            empty)
 
-          ,(pos (- (pos-x (gs-player game)) xcam) (- (pos-y (gs-player game)) ycam)) ; Player
+          ,(pos (- x xcam) (- y ycam)) ; Player
 
           ; HUD
           ,(pos SCENE.HALFWIDTH 4) ; Navbar
