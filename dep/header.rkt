@@ -8,7 +8,7 @@
 ; General
 (struct pos (x y)) ; Position Structure
 (struct car (pos speed index)) ; position and image index
-(struct gs (t fps deadline km camera player velocity accelerator wheel steering lives lane-y BOOST EXTRALIFE cars) #:mutable) ; Game State
+(struct gs (t fps deadline km camera player velocity accelerator spin wheel steering lives lane-y BOOST EXTRALIFE cars) #:mutable) ; Game State
 ; <number> <number> <number> <number> <pos> <pos> <pos> <int [-1, 1]> <number> <int [-1, 1]> <number> <number> <pos> <pos> <list<car>>
 (struct ts (heading subheading mouse-y exit)) ; Title State
 ; <string> <string> <boolean>

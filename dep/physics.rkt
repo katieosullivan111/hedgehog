@@ -39,7 +39,18 @@
                   (cond [(> (gs-wheel game) 0) -1] [(< (gs-wheel game) 0) 1] [else 0]) ; Wheel snap-back
                   (gs-steering game))))))) ; User steer
     ]
-    (if (and (= (gs-steering game) 0) (< (abs a) 1)) 0 a)))     
+    (if (and (= (gs-steering game) 0) (< (abs a) 1)) 0 a)))
+
+; Ensures player stays on the road
+(define (check-player-bounds game)
+  (let
+    ([x (pos-x (gs-player game))] [y (pos-y (gs-player game))] [bound-l (- SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)] [bound-r (+ SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)])
+
+    (cond
+      [(< x bound-l) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (+ bound-l 20) y))
+        (set-gs-wheel! game CAR.MAXSTEER)]
+      [(> x bound-r) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (- bound-r 20) y))
+        (set-gs-wheel! game (- CAR.MAXSTEER))])))
 
 ; tick
 (define (TICK-physics game delta)
@@ -57,6 +68,8 @@
     (pos
       (+ (pos-x (gs-player game)) (* xspeed delta))
       (- (pos-y (gs-player game)) (* newyspeed delta))))
+
+    (check-player-bounds game)
 
   ; Camera update
   (set-gs-camera! game (pos 0 (- (pos-y (gs-player game)) SCENE.CAMERAHEIGHT)))

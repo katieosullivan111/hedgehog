@@ -72,7 +72,7 @@
 
           ,@(if (< y AI.HEADSTART) (map (lambda (i) (hash-ref AI.images (car-index i))) (gs-cars game)) empty)
 
-          ,CAR
+          ,(rotate (gs-spin game) CAR)
 
           ; HUD
           ,NAVIGATION-BAR

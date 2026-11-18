@@ -10,23 +10,6 @@
     [x1 (pos-x pos1)] [y1 (pos-y pos1)]
     [x2 (pos-x pos2)] [y2 (pos-y pos2)])
     (and (<= (abs (- x1 x2)) range-x) (<= (abs (- y1 y2)) range-y))))
-
-;How far the player moves after a crash depending on velocity     
-(define (crash-distance game)
-  (cond
-    [(< (pos-y (gs-velocity game)) 50) 75]
-    [(< (pos-y (gs-velocity game)) 100) 125]
-    [(< (pos-y (gs-velocity game)) 150) 150]
-    [else 200]))
-
-;This function checks whether the player is in bounds on the leftmost lane
-(define (out-of-bounds game) (let
-  ([x (pos-x (gs-player game))] [y (pos-y (gs-player game))] [bound-l (- SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)] [bound-r (+ SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)])
-  (cond
-    [(< x bound-l) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (+ bound-l 20) y))
-      (set-gs-wheel! game CAR.MAXSTEER)]
-    [(> x bound-r) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (- bound-r 20) y))
-      (set-gs-wheel! game (- CAR.MAXSTEER))])))
             
 ;This function checks whether game-state objects like BOOST or EXTRALIFE are too far behind the player so that they can be recycled
 (define (behind? p game)
@@ -128,9 +111,6 @@
     (when (touching? (gs-EXTRALIFE game) (gs-player game))
       (set-gs-EXTRALIFE! game (pos (interval) (- (pos-y (gs-EXTRALIFE game)) (+ (random 5000) 10000))))
       (set-gs-deadline! game (+ (gs-deadline game) 2000)))
-
-    ; Keeps the player inside the leftmost lane and rightmost lane and deducts a life for crossing them
-    (out-of-bounds game)
 
     ; Recyclyes items when out of bounds
     (when (behind? gs-BOOST game)

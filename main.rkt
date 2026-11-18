@@ -19,6 +19,7 @@
   (current-inexact-milliseconds) 1 (+ (current-inexact-milliseconds) 20000) 1 ; time, fps, time remaining, n-th km of travel
   (pos 0 0) (pos SCENE.HALFWIDTH 0) (pos 0 (m2p 2)) ; camera, player, velocity vectors
   0 ; accelerator input
+  0 ; Car rotation
   0 0 ; wheel rotation and steering input
   3 ; lives
   0 ; lane-y
@@ -30,21 +31,29 @@
 ; Ticking and Animation
 (define (tick game)
   (if (gs? game)
-    (local [
-      (define now (current-inexact-milliseconds))
-      (define delta (min (- now (gs-t game)) 100)) ; delta time between frames, limit to >= 10 fps
-    ]
+    (let* (
+      [now (current-inexact-milliseconds)]
+      [delta (min (- now (gs-t game)) 100)] ; delta time between frames, limit to >= 10 fps
+      [delta-s (/ delta 1000)] ; delta in seconds
+    )
     ; Update fps counter
     (set-gs-t! game now)
     (when (= (modulo (round now) 5) 0)
       (set-gs-fps! game (round (/ 1000 delta))))
     
-    (TICK-physics game (/ delta 1000))
-    (TICK-animation game)
-    
-    (when (< (pos-y (gs-player game)) AI.HEADSTART) (collisions-update game (/ delta 1000)))
-    
-    (if (or (timeout? game) (= (gs-lives game) 0)) (STATE.TITLESCREEN "Driving Test:\n\tFAIL!") game))
+    (if (or (timeout? game) (<= (gs-lives game) 0))
+      (begin
+        (set-gs-player! game (pos
+          (+ (pos-x (gs-player game)) (* delta-s 1000))
+          (- (pos-y (gs-player game)) (* delta-s 1000))))
+        (set-gs-spin! game (+ (gs-spin game) (* delta-s 1000)))
+        (if (< (pos-x (gs-player game)) SCENE.WIDTH)
+          game
+          (STATE.TITLESCREEN "Driving Test:\n\tFAIL!")))
+      (begin
+        (TICK-physics game delta-s)
+        (when (< (pos-y (gs-player game)) AI.HEADSTART) (collisions-update game delta-s))
+        (TICK-animation game))))
     game)
   )
 
