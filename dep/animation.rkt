@@ -83,6 +83,8 @@
           ,(text (string-append "Score: " (number->string (round (p2m (- (pos-y (gs-player game))))))) 16 'red) ; Score text
           ,(text (string-append (number->string (gs-fps game)) " FPS") 16 'red) ; FPS
           ,(text (string-append "Lives: " (number->string (gs-lives game))) 18 'blue) ; Lives
+
+          ,(text (string-append (number->string (round (/ (- (gs-deadline game) (gs-t game)) 1000))) " s") 32 'green) ; Countdown
         )
         `(
           ; Road
@@ -110,15 +112,21 @@
           ,(pos 50 25) ; Score text
           ,(pos 50 40) ; FPS
           ,(pos 50 70) ; Lives
+
+          ,(pos SCENE.HALFWIDTH 50) ; Countdown
         )
     ))
     (draw-scene
       `(
+        ,@ROAD.LANEIMAGES
+
         ,(text (ts-heading game) 60 'yellow)
         ,(text (ts-subheading game) 20 'red)
         ,(text "Made by: Jack, Katie, and Tiernan" 20 'green)
       )
       `(
+        ,@(construct-lanes (modulo (round (- (ts-mouse-y game))) (+ ROAD.STRIPESPACING ROAD.STRIPEHEIGHT)))
+
         ,(pos SCENE.HALFWIDTH SCENE.HALFHEIGHT)
         ,(pos SCENE.HALFWIDTH (+ SCENE.HALFHEIGHT 140))
         ,(pos SCENE.HALFWIDTH (- SCENE.HEIGHT 50))

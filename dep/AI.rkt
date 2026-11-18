@@ -10,8 +10,6 @@
 (define AI.images (make-hash))
 (for/list ([i AI.imagecount])
   (hash-set! AI.images i (bitmap/file (string-append "img/npc/" (number->string (+ i 1)) ".png"))))
-; (define AI.images (build-list AI.imagecount (lambda (i)
-;   (bitmap/file (string-append "img/npc/" (number->string (+ i 1)) ".png")))))
 
 ; Creates the intial lane positions on which all NPCS are placed relative to
 (define AI.npc-height -200)
@@ -24,7 +22,9 @@
   (if (empty? x)
       empty
       (cons (car (pos (pos-x (car-pos (first x)))
-        (- (pos-y (car-pos (first x))) (speed game delta))) (car-index (first x)))
+        (- (pos-y (car-pos (first x))) (speed game delta)))
+        (car-speed (first x))
+        (car-index (first x)))
         (give-velocity (rest x) game delta))))
 
 (define (speed game delta)
@@ -66,7 +66,7 @@
 ; Converts the lists of random positions and images to random car structs
 (define (car-maker x y n)
   (if (< n AI.count)
-    (cons (car (first x) (first y)) (car-maker (rest x) (rest y) (+ n 1)))
+    (cons (car (first x) (m2p 35) (first y)) (car-maker (rest x) (rest y) (+ n 1)))
     empty))
 
 ; Converts the lane positions to a pos relative to the camera to be placed in draw
