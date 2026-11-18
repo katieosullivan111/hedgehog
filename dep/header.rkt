@@ -42,5 +42,6 @@
    (for/list ([i (- ROAD.LANES 1)])
       (+ SCENE.HALFWIDTH (/ ROAD.WIDTH -2) (/ ROAD.WIDTH ROAD.LANES) (* i (/ ROAD.WIDTH ROAD.LANES)))))
 
-; AI
+; Physics & AI
+(define CAR.MAXSTEER 30) ; Max Steering Angle (degrees)
 (define AI.count (hash-ref config 'npc-count))

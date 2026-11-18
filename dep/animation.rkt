@@ -68,7 +68,7 @@
           ,BOOST
           ,EXTRALIFE
 
-          ,@(map car-index (gs-cars game))
+          ,@(map (lambda (i) (hash-ref AI.images (car-index i))) (gs-cars game))
 
           ,CAR
 

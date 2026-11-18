@@ -1,11 +1,10 @@
 #lang racket
 (require "header.rkt")
 (require "AI.rkt")
-(require "animation.rkt")
 (require racket/list)
 (provide collisions-update)
 
-(define el 0.7) ;energy loss
+(define el 0.7) ; energy loss
 
 ;Checks if the car is touching an object
 (define (touching? p game)
@@ -30,13 +29,13 @@
     [else 200]))
 
 ;This function checks whether the player is in bounds on the leftmost lane
-(define (out-of-bounds game)  
-       (cond
-         [(< (pos-x (gs-player game)) 125) (and (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (+ (pos-x (gs-player game)) 100) (pos-y (gs-player game))))
-                 (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (* (pos-y (gs-velocity game)) el))))]
-         [(> (pos-x (gs-player game)) 875) (and (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (- (pos-x (gs-player game)) 100) (pos-y (gs-player game))))
-                 (set-gs-velocity! game (pos (pos-x (gs-velocity game)) (* (pos-y (gs-velocity game)) el))))]
-         [else game]))
+(define (out-of-bounds game) (let
+  ([x (pos-x (gs-player game))] [y (pos-y (gs-player game))] [bound-l (- SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)] [bound-r (+ SCENE.HALFWIDTH (/ ROAD.WIDTH 2) 15)])
+  (cond
+    [(< x bound-l) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (+ bound-l 20) y))
+      (set-gs-wheel! game CAR.MAXSTEER)]
+    [(> x bound-r) (set-gs-lives! game (- (gs-lives game) 1)) (set-gs-player! game (pos (- bound-r 20) y))
+      (set-gs-wheel! game (- CAR.MAXSTEER))])))
             
 ;This function checks whether game-state objects like BOOST or EXTRALIFE are too far behind the player so that they can be recycled
 (define (behind? p game)
@@ -59,7 +58,6 @@
   (let-values ([(i j) (partition (lambda (y) (and (<= (abs (- (pos-y (car-pos y)) (pos-y (car-pos (first x))))) 200)
                                                   (<= (abs (- (pos-x (car-pos y)) (pos-x (car-pos (first x))))) 55))) (remove (first x) x))])
                                  (cons (first x) (append (add-small-gap i game) (checker j game))))))
-
 
 ;This gives cars which are touching a new pos away from each other
 (define (add-small-gap x game)
@@ -85,7 +83,7 @@
     (if (empty? x)
       empty
       (cons
-        (car (pos (+ (list-ref AI.LANEX r) x-offset) (+ (pos-y (gs-player game)) (* (+ (random 500) (respawn-condition 1000 game)) direction))) (list-ref AI.images (random AI.imagecount)))
+        (car (pos (+ (list-ref AI.LANEX r) x-offset) (+ (pos-y (gs-player game)) (* (+ (random 500) (respawn-condition 1000 game)) direction))) (random AI.imagecount))
         (add-gap (rest x) game direction)))))
 
 ; How far ahead the cars spawn depending on velocity

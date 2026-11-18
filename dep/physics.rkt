@@ -24,15 +24,14 @@
     (if (> v 0) (- 0 (if (= a -1) CAR.BRAKEPOWER 0) rolling-resistance (drag v)) (/ (* v CAR.MASS -1) d)))) ; N
 
 ; Mechanics
-(define steer-max 30) ; Max Steering Angle (degrees)
 (define (steer-omega d) (* 50 d)) ; Steering angular velocity (degrees/second)
 (define (steer-wheel game delta)
   (local [
     (define a
       (max
-        (- steer-max) ; Keep wheel rotation within physical bounds
+        (- CAR.MAXSTEER) ; Keep wheel rotation within physical bounds
         (min
-          steer-max
+          CAR.MAXSTEER
           (+
             (gs-wheel game)
             (* (steer-omega delta)

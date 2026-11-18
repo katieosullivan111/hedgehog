@@ -7,8 +7,11 @@
 
 ;List of all vehicles
 (define AI.imagecount 12)
-(define AI.images (build-list AI.imagecount (lambda (i)
-  (bitmap/file (string-append "img/npc/" (number->string (+ i 1)) ".png")))))
+(define AI.images (make-hash))
+(for/list ([i AI.imagecount])
+  (hash-set! AI.images i (bitmap/file (string-append "img/npc/" (number->string (+ i 1)) ".png"))))
+; (define AI.images (build-list AI.imagecount (lambda (i)
+;   (bitmap/file (string-append "img/npc/" (number->string (+ i 1)) ".png")))))
 
 ; Creates the intial lane positions on which all NPCS are placed relative to
 (define AI.npc-height -200)
@@ -27,18 +30,18 @@
 (define (speed game delta)
   (* delta (pos-y (gs-velocity game)) 0.8))
 
-;Creates a list of random positions
-;Uses an accumulator n to decide how many positions should be made
-;a b c d ensure that no cars are initially placed on top of each other and place the next car a random position further than the last car,
-;although an additional function is required to ensure the random positions dont overlap
-;List ref will take the random number from rand-generator and run it in cond, so a random lane is selected without replacing constantly at a new lane.
+; Creates a list of random positions
+; Uses an accumulator n to decide how many positions should be made
+; a b c d ensure that no cars are initially placed on top of each other and place the next car a random position further than the last car,
+; although an additional function is required to ensure the random positions dont overlap
+; List ref will take the random number from rand-generator and run it in cond, so a random lane is selected without replacing constantly at a new lane.
 (define (sum n lane-count)
   (if (< n AI.count)
     (local [
       (define q 800)
       (define y-offset (map (lambda (i) (* i q)) lane-count))
       (define randy (random 800)) (define r (random ROAD.LANES))
-      (define x-offset (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 35)))
+      (define x-offset (+ 35 (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 70))))
       ]
       (cons
         (pos (+ (list-ref AI.LANEX r) x-offset) (- (list-ref y-offset r) randy))
@@ -48,17 +51,17 @@
 
 ; Makes a list of 30 images to match the positions
 ; When the list is empty it appends the full list, until the total length is 81
-(define (make-more-vehicles x g)
+(define (make-car-images x g)
   (if (< g AI.count)
-    (cons (list-ref AI.images (random AI.imagecount)) (make-more-vehicles x (+ g 1)))
+    (cons (random AI.imagecount) (make-car-images x (+ g 1)))
     empty))
 
-;Creates a list of AI.count random positions
+; Creates a list of AI.count random positions
 (define mega
   (sum 0 (make-list ROAD.LANES 0)))
 
-;Creates a list of AI.count vehicles
-(define mega2 (make-more-vehicles AI.images 0))
+; Creates a list of AI.count vehicles
+(define mega2 (make-car-images AI.images 0))
 
 ; Converts the lists of random positions and images to random car structs
 (define (car-maker x y n)
