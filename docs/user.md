@@ -44,11 +44,17 @@ When the user moves the car left or right, the steering wheel in the bottom left
 
 - <ins><b>Extra Time:</b></ins>
   
-  ![extra life image](/img/life.png)
+  ![extra life image](/img/time.png)
 
   When you collect the extra time element, you get en extra two seconds to travel the 1000 metres.
 <br>
 You can keep an eye out for these elements by looking at the grey navigation bar at the top of the screen. A red bar represents an incoming boost, and a blue bar represents an incoming extra time.
+
+<br> 
+
+## Adjustability
+
+To adjust screen size, frames per second, traffic density and initial lives, the user can go to [config.json file](/config.json), and edit the relevant figure.
 
 
 <br><br><br>
