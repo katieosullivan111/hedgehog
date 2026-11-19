@@ -1,5 +1,6 @@
 #lang racket
 (require json)
+(require (only-in racket/gui/base play-sound))
 (provide (all-defined-out))
 
 ; Read data from config file
@@ -9,7 +10,7 @@
 ; General
 (struct pos (x y)) ; Position Structure
 (struct car (pos speed lane index) #:transparent) ; position and image index
-(struct gs (t fps deadline km camera player velocity accelerator spin wheel steering lives lane-y BOOST EXTRALIFE cars) #:mutable) ; Game State
+(struct gs (t fps deadline km camera player velocity accelerator spin wheel steering lives lane-y BOOST EXTRATIME cars) #:mutable) ; Game State
 ; <number> <number> <number> <number> <pos> <pos> <pos> <int [-1, 1]> <number> <int [-1, 1]> <number> <number> <pos> <pos> <list<car>>
 (struct ts (heading subheading mouse-y exit)) ; Title State
 ; <string> <string> <boolean>
@@ -23,6 +24,15 @@
   (if (zero? i)
     (cons (add1 (first list)) (rest list))
     (cons (first list) (list-increment (rest list) (sub1 i)))))
+
+;Sound
+(define (accelerate) (play-sound "sounds/acceleration.aiff" #t))
+(define (crash) (play-sound "sounds/carcrash.aiff" #t))
+(define (brake) (play-sound "sounds/braking.aiff" #t))
+(define (bounds) (play-sound "sounds/bounds.aiff" #t))
+(define (startup) (play-sound "sounds/startup.aiff" #t))
+(define (BOOST) (play-sound "sounds/BOOST.aiff" #t))
+(define (EXTRATIME) (play-sound "sounds/EXTRATIME.aiff" #t)) 
 
 ; Animation
 (define MAXFPS (hash-ref config 'max_fps))

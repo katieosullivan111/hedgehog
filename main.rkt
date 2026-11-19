@@ -69,13 +69,13 @@
 (define (keydown game k)
   (if (gs? game)
     (case k
-      [("w") (set-gs-accelerator! game 1) game]
-      [("s") (set-gs-accelerator! game -1) game]
+      [("w") (begin (set-gs-accelerator! game 1) (accelerate)) game]
+      [("s") (begin (set-gs-accelerator! game -1) (brake)) game]
       [("a") (set-gs-steering! game -1) game]
       [("d") (set-gs-steering! game 1) game]
       [else game])
     (case k
-      [(" ") (STATE.GAME)]
+      [(" ") (begin (startup) (STATE.GAME))]
       [("escape") (ts 0 0 0 #t)]
       [else game])))
 (define (keyup game k)

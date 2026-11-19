@@ -64,7 +64,8 @@
       [y (pos-y (gs-player game))]
       [countdown-raw (/ (round (/ (- (gs-deadline game) (gs-t game)) 100)) 10)]
       [countdown (round countdown-raw)]
-      [distance (round (p2m (- y)))])
+      [distance (round (p2m (- y)))]
+      [d (/ (- (gs-deadline game) (gs-t game)) 1000)])
       (draw-scene
         `( ; Last item in list is on top
           ; Road
@@ -88,12 +89,17 @@
           ,(text (string-append (number->string (gs-fps game)) " FPS") 16 'red) ; FPS
           ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 36 'blue) ; Speed text
           ,(text (string-append (number->string distance) " m") 16 'red) ; Score text
+          ,(text (string-append (number->string (p2m (round (abs (- (pos-y (gs-player game)) (pos-y (gs-EXTRATIME game))))))) " m until next EXTRATIME") 16 'blue) ; Time until next icon
+
 
           ,HEART
           ,(text (number->string (gs-lives game)) 70 'white) ; Lives
 
           ,(text (string-append (number->string (- (* (gs-km game) 1000) distance)) " m") 32 'blue) ; Metre Countdown
-          ,(text (string-append (number->string (if (<= countdown 10) countdown-raw countdown)) " s") (if (<= countdown 3) 50 32) (if (<= countdown 3) 'red 'green)) ; Countdown
+          ,(text (string-append (number->string (if (<= countdown 10) countdown-raw countdown)) " s") 16 (cond
+                                                                                                                [(>= d 15) 'green]
+                                                                                                                [(>= d 10) 'blue]
+                                                                                                                [else 'red])) ; Countdown
         )
         `(
           ; Road
@@ -101,7 +107,7 @@
           ,(pos SCENE.HALFWIDTH (- -400 ycam)) ; Warning
           
           ,(pos (- (pos-x (gs-BOOST game)) xcam) (- (pos-y (gs-BOOST game)) ycam)) ; Boost
-          ,(pos (- (pos-x (gs-EXTRALIFE game)) xcam) (- (pos-y (gs-EXTRALIFE game)) ycam)) ; Extralife
+          ,(pos (- (pos-x (gs-EXTRATIME game)) xcam) (- (pos-y (gs-EXTRATIME game)) ycam)) ; Extralife
 
           ,@(if (< y AI.HEADSTART)
             (map
@@ -115,13 +121,14 @@
           ; HUD
           ,(pos SCENE.HALFWIDTH 4) ; Navbar
           ,(pos (pos-x (gs-BOOST game)) 4) ;Sets the rectangle to show the next BOOST'S x co-ordinate
-          ,(pos (pos-x (gs-EXTRALIFE game)) 4)
+          ,(pos (pos-x (gs-EXTRATIME game)) 4)
 
           ,(pos 100 (- SCENE.HEIGHT 100)) ; Steering Wheel
           
           ,(pos 50 10) ; FPS
           ,(pos SCENE.HALFWIDTH (- SCENE.HEIGHT 30)) ; Speed text
           ,(pos 50 25) ; Score text
+          ,(pos 110 50) ; Time until next EXTRATIME
 
           ,(pos (- SCENE.WIDTH 100) 100) ; Heart
           ,(pos (- SCENE.WIDTH 100) 105) ; Lives

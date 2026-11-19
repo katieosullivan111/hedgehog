@@ -107,6 +107,7 @@
 
                     (set-gs-lives! game (- (gs-lives game) 1))
                     (set-gs-player! game (pos x (+ y (* 10 (if (< vy v-car) -1 1)))))
+                    (crash)
 
                     ; Return value: NPC's speed
                     (/ (+ v-total e*v-relative) 2))
@@ -120,15 +121,17 @@
     ; Handle Boost and Extra-time items
     (when (touching? (gs-BOOST game) r)
       (set-gs-BOOST! game (pos (interval) (- (pos-y (gs-BOOST game)) (+ (random 1000) 2000))))
+      (BOOST)
       (set-gs-velocity! game (pos (pos-x v) (+ (pos-y v) 200))))
-    (when (touching? (gs-EXTRALIFE game) r)
-      (set-gs-EXTRALIFE! game (pos (interval) (- (pos-y (gs-EXTRALIFE game)) (+ (random 5000) 10000))))
+    (when (touching? (gs-EXTRATIME game) r)
+      (set-gs-EXTRATIME! game (pos (interval) (- (pos-y (gs-EXTRATIME game)) (+ (random 5000) 10000))))
+      (EXTRATIME)
       (set-gs-deadline! game (+ (gs-deadline game) 2000)))
 
     ; Recyclyes items when out of bounds
     (when (behind? gs-BOOST game)
       (set-gs-BOOST! game (pos (interval) (- (pos-y (gs-BOOST game)) (spawn-distance (pos-y v))))))
-    (when (behind? gs-EXTRALIFE game)
-      (set-gs-EXTRALIFE! game (pos (interval) (- (pos-y (gs-EXTRALIFE game)) (spawn-distance (pos-y v))))))
+    (when (behind? gs-EXTRATIME game)
+      (set-gs-EXTRATIME! game (pos (interval) (- (pos-y (gs-EXTRATIME game)) (spawn-distance (pos-y v))))))
 
     game))

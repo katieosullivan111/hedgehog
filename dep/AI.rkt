@@ -23,7 +23,7 @@
   (hash-set! AI.LANESPEEDS i (m2p (+ 30 (* i 5))))) ; (ie. First lane 30 m/s target)
 
 (define (speed game delta)
-  (* delta (pos-y (gs-velocity game)) 0.8))
+  (* delta (pos-y (gs-velocity game)) 0.7))
 
 ; Creates a list of n random positions of cars
 (define (make-car-pos n no./lane) ; no./lane = no. of cars per lane <list>
