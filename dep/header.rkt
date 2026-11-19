@@ -4,10 +4,11 @@
 
 ; Read data from config file
 (define config (call-with-input-file "config.json" read-json))
+(define MAXLIVES (hash-ref config 'lives))
 
 ; General
 (struct pos (x y)) ; Position Structure
-(struct car (pos speed index)) ; position and image index
+(struct car (pos speed lane index) #:transparent) ; position and image index
 (struct gs (t fps deadline km camera player velocity accelerator spin wheel steering lives lane-y BOOST EXTRALIFE cars) #:mutable) ; Game State
 ; <number> <number> <number> <number> <pos> <pos> <pos> <int [-1, 1]> <number> <int [-1, 1]> <number> <number> <pos> <pos> <list<car>>
 (struct ts (heading subheading mouse-y exit)) ; Title State
@@ -27,7 +28,7 @@
 (define MAXFPS (hash-ref config 'max_fps))
 
 (define ROAD.WIDTH 800)
-(define SCENE.WIDTH (max(hash-ref (hash-ref config 'resolution) 'width) (+ ROAD.WIDTH 80)))
+(define SCENE.WIDTH (max (hash-ref (hash-ref config 'resolution) 'width) (+ ROAD.WIDTH 80)))
 (define SCENE.HEIGHT (hash-ref (hash-ref config 'resolution) 'height))
 (define SCENE.HALFHEIGHT (/ SCENE.HEIGHT 2))
 (define SCENE.HALFWIDTH (/ SCENE.WIDTH 2))

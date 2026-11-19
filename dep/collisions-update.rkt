@@ -15,48 +15,73 @@
 (define (behind? p game)
   (< (pos-y (gs-player game)) (- (pos-y (p game)) 300)))
 
-; This function splits the list of NPCS into three: whether they are within a reasonable distance of the player, whether we have passed them or whether they are too far in front. Add-gap then takes the list
-; of cars which are too far behind, takes their pos and converts it to one in front and then it is appended back onto to the list of cars within a reasonable distance to the player
-; Let-values allows the two lists to be distinguished and called within the function
-(define (keep-cars? x game)
+; Recycle cars that are far behind when the player is faster, or far ahead when slower.
+(define (keep-cars? cars game)
   (let*-values (
-    [(a b) (partition
-      (lambda (y) (< (pos-y (car-pos y)) (+ (pos-y (gs-player game)) 1000)))
-      x)]
-    [(c d) (partition
-      (lambda (y) (< (pos-y (car-pos y)) (- (pos-y (gs-player game)) 2500)))
-      a)])
+    [(too-far-behind remaining)
+      (partition
+        (lambda (npc)
+          (and
+            (> (pos-y (gs-velocity game)) (car-speed npc))
+            (> (pos-y (car-pos npc)) (+ (pos-y (gs-player game)) 300))))
+        cars)]
+    [(too-far-ahead nearby)
+      (partition
+        (lambda (npc)
+          (and
+            (< (pos-y (gs-velocity game)) (car-speed npc))
+            (< (pos-y (car-pos npc)) (- (pos-y (gs-player game)) SCENE.HEIGHT))))
+        remaining)])
+    (append
+      (add-gap too-far-behind game -1)
+      nearby
+      (add-gap too-far-ahead game 1))))
 
-    (append (add-gap b game -1) d (add-gap c game 1))))
-
-;This function partitions the list into cars that are not touching and cars which are, so they can de identified and adjusted
-(define (checker x game)
-  (if (empty? x) 
+; This function partitions the list into cars that are not touching and cars which are, so they can de identified and adjusted
+(define (checker-aux npc c)
+    (cond
+      [(empty? c) empty]
+      [(and
+        (<= (abs (- (pos-y (car-pos npc)) (pos-y (car-pos (first c))))) 200)
+        (<= (abs (- (pos-x (car-pos npc)) (pos-x (car-pos (first c))))) 55))
+        (if (>= (pos-y (car-pos npc)) (pos-y (car-pos (first c))))
+          (cons
+            (car
+              (pos (pos-x (car-pos (first c))) (- (pos-y (car-pos (first c))) 5))
+              (+ (car-speed (first c)) 50)
+              (car-lane (first c))
+              (car-index (first c)))
+            (rest c))
+          (cons (first c) (checker-aux npc (rest c))))]
+      [else (cons (first c) (checker-aux npc (rest c)))]))
+(define (checker c game)
+  (if (empty? c)
     empty
-    (let-values ([(i j) (partition
-      (lambda (y)
-        (and
-          (<= (abs (- (pos-y (car-pos y)) (pos-y (car-pos (first x))))) 200)
-          (<= (abs (- (pos-x (car-pos y)) (pos-x (car-pos (first x))))) 55)))
-      (remove (first x) x))])
-
-      (cons (first x) (append (add-small-gap i game) (checker j game))))))
+    (cons (first c) (checker (checker-aux (first c) (rest c)) game))))
 
 ;This gives cars which are touching a new pos away from each other
-(define (add-small-gap x game)
-  (if (empty? x)
-      empty
-      (cons (car (pos (pos-x (car-pos (first x))) (- (pos-y (car-pos (first x))) 100)) (car-speed (first x)) (car-index (first x))) (add-small-gap (rest x) game))))
+(define (add-small-gap c game)
+  (if (empty? c)
+    empty
+    (cons
+      (car (pos (pos-x (car-pos (first c))) (- (pos-y (car-pos (first c))) 5)) (+ (car-speed (first c)) 50) (car-lane (first c)) (car-index (first c)))
+      (add-small-gap (rest c) game))))
 
 ; Recycles cars out of range
  (define (add-gap x game direction) ; direction -1 for in front, +1 for behind player
   (local [
-    (define r (random ROAD.LANES))
-    (define x-offset (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 35)))]
+    (define lane (random ROAD.LANES))
+    (define x-offset (+ 35 (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 70))))]
     (if (empty? x)
       empty
       (cons
-        (car (pos (+ (list-ref AI.LANEX r) x-offset) (+ (pos-y (gs-player game)) (+ (random 500) (* (+ SCENE.HEIGHT (pos-y (gs-velocity game))) direction)))) (m2p 35) (random AI.imagecount))
+        (car
+          (pos
+            (+ (list-ref AI.LANEX lane) x-offset)
+            (+ (pos-y (gs-player game)) (random 500) (* (+ SCENE.HEIGHT (if (< direction 0) (pos-y (gs-velocity game)) 0)) direction)))
+          (hash-ref AI.LANESPEEDS lane)
+          lane
+          (random AI.imagecount))
         (add-gap (rest x) game direction)))))
 
 ; Returns a random x value within the bounds of the road
@@ -64,19 +89,23 @@
 
 ;Collisions with cars and objects which affect the gs
 (define (collisions-update game delta)
-  (local [
+  (letrec (
     ; Constants
-    (define r (gs-player game))
-    (define v (gs-velocity game))
+    [r (gs-player game)]
+    [v (gs-velocity game)]
 
-    (define (spawn-distance v) ; How far ahead the collectibles spawn depending on velocity
+    [spawn-distance (lambda (v) ; How far ahead the collectibles spawn depending on velocity
       (cond
         [(< v 50) (+ (random 100) 1800)]
         [(< v 100) (+ (random 100) 2500)]
         [(< v 150) (+ (random 100) 3500)]
-        [else (+ (random 100) 4500)]))
+        [else (+ (random 100) 4500)]))]
+    [normalise-v (lambda (v target)
+      (min
+        target
+        (- v (* AI.deceleration delta))))]
 
-    (define (update-cars cars game delta)
+    [update-cars (lambda (cars game delta)
       (if (empty? cars)
         empty
         (let*
@@ -104,11 +133,12 @@
 
                   ; Return value: NPC's speed
                   (/ (+ v-total e*v-relative) 2))
-                v-car)
+                (normalise-v v-car (hash-ref AI.LANESPEEDS (car-lane npc))))
+              (car-lane npc)
               (car-index npc))
-            (update-cars (rest cars) game delta)))))
-  ]
-    (set-gs-cars! game (update-cars (keep-cars? (checker (gs-cars game) game) game) game delta))
+            (update-cars (rest cars) game delta)))))]
+  )
+    (set-gs-cars! game (update-cars (keep-cars? (checker (reverse (gs-cars game)) game) game) game delta))
 
     ; Handle Boost and Extra-time items
     (when (touching? (gs-BOOST game) r)

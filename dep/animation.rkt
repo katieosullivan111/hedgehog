@@ -45,8 +45,8 @@
     (pos x (+ y ROAD.LANEOFFSET))) ROAD.STRIPEX)) ; how high it should be = the offset to give it overflow
 
 (define (draw-scene imgs posns) ; Draw scene from lists of images and positions
-  (foldl (lambda (img pos scene)
-    (place-image img (pos-x pos) (pos-y pos) scene))
+  (foldl
+    (lambda (img posn scene) (place-image img (pos-x posn) (pos-y posn) scene))
     SCENE.BG
     imgs
     posns))
