@@ -411,20 +411,20 @@ EXTRATIME: https://publicdomainvectors.org/en/free-clipart/Stopwatch-without-sha
 Steering wheel: https://publicdomainvectors.org/en/free-clipart/Driving-wheel-vector-image/7352.html
 
 Code and Miscellaneous:
--https://drive.google.com/file/d/1-yiF2Pq-OgJaTXsMAQbIckoDzGINz26O/view
--https://www.gamedevs.org/uploads/grand-theft-auto.pdf
--https://connect-prd-cdn.unity.com/20201215/83f3733d-3146-42de-8a69-f461d6662eb1/Game-Design-Document-Template.pdf
--https://5years.doomworld.com/doombible/doombible.pdf ;All of the above were referenced as examples and templates when writing the developer documentation.
--https://app.smartdraw.com/editor.aspx?credID=-108485678&depoId=78161746&flags=128 ;Used to draw the flowchart in this document.
--https://youtu.be/fBf90zHMrR4
--https://youtu.be/9T5H8CYaurI
--https://docs.racket-lang.org/reference/pairs.html#%28def._%28%28lib._racket%2Flist..rkt%29._partition%29%29
--https://docs.racket-lang.org/guide/lambda.html?version=9.3
--https://docs.racket-lang.org/reference/let.html?version=9.3#%28form._%28%28quote._~23~25kernel%29._let-values%29%29
--https://docs.racket-lang.org/reference/define-struct.html?version=9.3#%28form._%28%28lib._racket%2Fprivate%2Fbase..rkt%29._struct%29%29
--https://htdp.org
--https://freesound.org/people/Logicogonist/sounds/807438/
--https://freesound.org/people/DigPro120/sounds/859910/
+- https://drive.google.com/file/d/1-yiF2Pq-OgJaTXsMAQbIckoDzGINz26O/view
+- https://www.gamedevs.org/uploads/grand-theft-auto.pdf
+- https://connect-prd-cdn.unity.com/20201215/83f3733d-3146-42de-8a69-f461d6662eb1/Game-Design-Document-Template.pdf
+- https://5years.doomworld.com/doombible/doombible.pdf ;All of the above were referenced as examples and templates when writing the developer documentation.
+- https://app.smartdraw.com/editor.aspx?credID=-108485678&depoId=78161746&flags=128 ;Used to draw the flowchart in this document.
+- https://youtu.be/fBf90zHMrR4
+- https://youtu.be/9T5H8CYaurI
+- https://docs.racket-lang.org/reference/pairs.html#%28def._%28%28lib._racket%2Flist..rkt%29._partition%29%29
+- https://docs.racket-lang.org/guide/lambda.html?version=9.3
+- https://docs.racket-lang.org/reference/let.html?version=9.3#%28form._%28%28quote._~23~25kernel%29._let-values%29%29
+- https://docs.racket-lang.org/reference/define-struct.html?version=9.3#%28form._%28%28lib._racket%2Fprivate%2Fbase..rkt%29._struct%29%29
+- https://htdp.org
+- https://freesound.org/people/Logicogonist/sounds/807438/
+- https://freesound.org/people/DigPro120/sounds/859910/
 -https://freesound.org/people/roboroo/sounds/436786/
 -0https://freesound.org/people/Paloma.SSSS/sounds/841370/ ; no sound fils contained any license restrictions
 -audacity 4 used to edit sound files
