@@ -16,8 +16,8 @@
   0 ; y-position of mouse
   #f)) ; terminate boolean
 (define (STATE.GAME) (gs
-  (current-inexact-milliseconds) 1 (+ (current-inexact-milliseconds) 200000) 1 ; time, fps, time remaining, n-th km of travel
-  (pos 0 0) (pos SCENE.HALFWIDTH 0) (pos 0 (m2p 2)) ; camera, player, velocity vectors
+  (current-inexact-milliseconds) 1 (+ (current-inexact-milliseconds) 20000) 1 ; time, fps, time remaining, n-th km of travel
+  (pos 0 0) (pos (- (first ROAD.STRIPEX) (/ ROAD.WIDTH ROAD.LANES 2)) 0) (pos 0 (m2p 2)) ; camera, player, velocity vectors
   0 ; accelerator input
   0 ; Car rotation
   0 0 ; wheel rotation and steering input
@@ -41,7 +41,7 @@
     (when (= (modulo (round now) 5) 0)
       (set-gs-fps! game (round (/ 1000 delta))))
     
-    (if (or (timeout? game) (<= (gs-lives game) -1000))
+    (if (or (timeout? game) (<= (gs-lives game) 0))
       (begin
         (set-gs-player! game (pos
           (+ (pos-x (gs-player game)) (* delta-s 1000))

@@ -221,7 +221,7 @@ All items (unless intended to stay on the screen at all times such as the score 
 
 (pos (- (pos-x (gs-BOOST game)) xcam) (- (pos-y (gs-BOOST game)) ycam)).
 
-##Physics
+## Physics
 The programme uses researched physical values to accurately describe the motion of the car on the road. The code accounts for any major forces which would have an effect on its motion:
 
 (define g 9.8) ; m/s^2
@@ -245,7 +245,7 @@ Netforce uses these quantities to model the total force acting on the car, which
 
 In terms of collisions, ‘el’ determines how much energy is retained by the car, used in ‘out-of-bounds’, ‘touching’ and ‘touching-cars?’. It’s worth noting that in terms of collisions player enjoyment was heavily prioritised over making a realistic system where the player crashing results in a major loss of velocity which would make the game too difficult.
 
-#Steering
+# Steering
 The steering control the player’s movement in the x direction.
 It is calculated with degrees and is made to model a realistic steering system.
 The maximum steering angle is set to 30 degrees. 
@@ -266,7 +266,7 @@ In draw, the wheel is set to rotate by the value stored in the gs multiplied by 
 
 In ‘TICK-physics’, the function passed to ‘tick’, the player’s movement in the x-plane is the conversion of ‘gs-wheel’ from m2p multiplied by delta (the change in its angular velocity). The steering motion is controlled directly by the wheel’s current numerical value, which will move between -1 and 1 depending on steering’s value (remember steering is what changes from the player input).
 
-##Road
+## Road
 The road values are defined in ‘animation.rkt’.
 
 The road itself is defined under ‘ROAD’ which creates an image of two yellow lines, a black road and the grass patches on either side of the road and uses beside to orientate them.  
@@ -283,7 +283,7 @@ If the remainder of SCENE.HEIGHT/ROAD.STRIPESPACING =0, the road section ends wi
 `construct-lanes` creates a list of positions for the lanes by calculating
 This also makes it easier for the player to choose a different SCENE.WIDTH or SCENE.HEIGHT in json, as the lanes will adjust accordingly.
 
-##Animation
+## Animation
 All objects are placed by `draw` which is updated in tick.
 ‘draw-scene’ allows developers to pass two lists to ‘draw’, the first containing all images and the second with their corresponding positions.
 Quasi-quotation is used so lists such as ‘ROAD.LANEIMAGES’ and ‘gs-cars’ can be passed directly into the draw-scene lists.
@@ -298,7 +298,7 @@ To use quasiquotation, @ a list and place a comment before each item, like so:
     imgs
     posns))
 
-##Tick
+## Tick
 The functions passed to tick are the following:
 -(TICK-physics game delta)
 -(TICK-animation game)
@@ -313,14 +313,14 @@ If a new function like these is created it should be passed through here, althou
 
 `(big-bang init [on-tick tick (/ 1 MAXFPS)] [to-draw draw] [on-key keydown] [on-release keyup] [stop-when game-over?])`
 Where it aims to tick once per game.
-##Big-Bang
+## Big-Bang
 This creates the universe and tells the programme what functions to run for any given moment on event.
 Passing `tick` to `on-tick` tells the game to update that function every tick.
 Passing `draw` to `to-draw`tells the game what function to use when drawing the universe.
 `on-key` and `on-release` tell the game to use `keydown` or `keyup` respectively.
 Passing `game-over?` to `stop-when` tells the universe when to terminate.
 
-#json
+# json
 The json file is used to allow players and developers to change important repeated numerical values with ease.
 In this file the values of the map’s width and height, the maximum fps as well as the number, of AIs can be changed by simply altering the number.
 If a developer were to decide to add another important repeated value, they should type it in json and use hash-ref to access it in the game, as can be seen in `header.rkt`:
@@ -328,7 +328,7 @@ If a developer were to decide to add another important repeated value, they shou
 `configure` is defined in `header.rkt` to allow developers to reference the file.
 
 
-##References 
+## References 
 
 Images:
 
@@ -351,6 +351,7 @@ Items:
 BOOST: https://publicdomainvectors.org/en/free-clipart/Vector-illustration-of-fuel-canister/17859.html
 EXTRALIFE: https://publicdomainvectors.org/en/free-clipart/Car-wheel-vector-image/5122.html
 Steering wheel: https://publicdomainvectors.org/en/free-clipart/Driving-wheel-vector-image/7352.html
+Heart: https://publicdomainvectors.org/en/free-clipart/Vector-illustration-of-red-heart/4853.html
 
 Jack:
 -https://drive.google.com/file/d/1-yiF2Pq-OgJaTXsMAQbIckoDzGINz26O/view

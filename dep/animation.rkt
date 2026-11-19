@@ -63,7 +63,8 @@
       [x (pos-x (gs-player game))]
       [y (pos-y (gs-player game))]
       [countdown-raw (/ (round (/ (- (gs-deadline game) (gs-t game)) 100)) 10)]
-      [countdown (round countdown-raw)])
+      [countdown (round countdown-raw)]
+      [distance (round (p2m (- y)))])
       (draw-scene
         `( ; Last item in list is on top
           ; Road
@@ -84,12 +85,14 @@
 
           ,(rotate (* (gs-wheel game) -9) STEERINGWHEEL)
 
-          ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 16 'red) ; Speed text
-          ,(text (string-append "Score: " (number->string (round (p2m (- y))))) 16 'red) ; Score text
           ,(text (string-append (number->string (gs-fps game)) " FPS") 16 'red) ; FPS
+          ,(text (string-append (number->string (round (* 3.6 (p2m (pos-y (gs-velocity game)))))) " km/h") 36 'blue) ; Speed text
+          ,(text (string-append (number->string distance) " m") 16 'red) ; Score text
 
           ,HEART
           ,(text (number->string (gs-lives game)) 70 'white) ; Lives
+
+          ,(text (string-append (number->string (- (* (gs-km game) 1000) distance)) " m") 32 'blue) ; Metre Countdown
           ,(text (string-append (number->string (if (<= countdown 10) countdown-raw countdown)) " s") (if (<= countdown 3) 50 32) (if (<= countdown 3) 'red 'green)) ; Countdown
         )
         `(
@@ -116,14 +119,15 @@
 
           ,(pos 100 (- SCENE.HEIGHT 100)) ; Steering Wheel
           
-          ,(pos 50 10) ; Speed text
+          ,(pos 50 10) ; FPS
+          ,(pos SCENE.HALFWIDTH (- SCENE.HEIGHT 30)) ; Speed text
           ,(pos 50 25) ; Score text
-          ,(pos 50 40) ; FPS
 
           ,(pos (- SCENE.WIDTH 100) 100) ; Heart
           ,(pos (- SCENE.WIDTH 100) 105) ; Lives
 
-          ,(pos SCENE.HALFWIDTH 50) ; Countdown
+          ,(pos SCENE.HALFWIDTH 30) ; Metre countdown
+          ,(pos SCENE.HALFWIDTH 70) ; Countdown
         )
     ))
     (draw-scene

@@ -37,27 +37,28 @@
       nearby
       (add-gap too-far-ahead game 1))))
 
-; This function partitions the list into cars that are not touching and cars which are, so they can de identified and adjusted
-(define (checker-aux npc c)
-    (cond
-      [(empty? c) empty]
-      [(and
-        (<= (abs (- (pos-y (car-pos npc)) (pos-y (car-pos (first c))))) 200)
-        (<= (abs (- (pos-x (car-pos npc)) (pos-x (car-pos (first c))))) 55))
-        (if (>= (pos-y (car-pos npc)) (pos-y (car-pos (first c))))
+; This function adjusts cars which are too close together, by speeding up cars being overtaken
+(define (checker c game)
+  (letrec (
+    [checker-aux (lambda (npc c)
+      (cond
+        [(empty? c) empty]
+        [(and
+          (= (car-lane npc) (car-lane (first c))) ; Same Lane
+          (>= (pos-y (car-pos npc)) (pos-y (car-pos (first c))))) ; npc lower than (first c)
+          (<= (abs (- (pos-y (car-pos npc)) (pos-y (car-pos (first c))))) 150) ; Close y-positions
+          
           (cons
             (car
-              (pos (pos-x (car-pos (first c))) (- (pos-y (car-pos (first c))) 5))
-              (+ (car-speed (first c)) 50)
+              (pos (pos-x (car-pos (first c))) (- (pos-y (car-pos (first c))) 2))
+              (+ (car-speed (first c)) 200) ; Speed up car to get it ahead
               (car-lane (first c))
               (car-index (first c)))
-            (rest c))
-          (cons (first c) (checker-aux npc (rest c))))]
-      [else (cons (first c) (checker-aux npc (rest c)))]))
-(define (checker c game)
-  (if (empty? c)
-    empty
-    (cons (first c) (checker (checker-aux (first c) (rest c)) game))))
+            (rest c))]
+        [else (cons (first c) (checker-aux npc (rest c)))]))])
+    (if (empty? c)
+      empty
+      (cons (first c) (checker (checker-aux (first c) (rest c)) game)))))
 
 ;This gives cars which are touching a new pos away from each other
 (define (add-small-gap c game)
