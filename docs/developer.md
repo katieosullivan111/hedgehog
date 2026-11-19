@@ -392,18 +392,18 @@ Images:
 
 Player: https://publicdomainvectors.org/en/free-clipart/Red-car-vector-art/2579.html
 AI: 
--https://publicdomainvectors.org/en/free-clipart/Top-view-car-vector/2260.html
--https://publicdomainvectors.org/en/free-clipart/Vector-image-of-a-car/3123.html
--https://publicdomainvectors.org/en/free-clipart/Turquoise-racing-car-vector-drawing/9690.html
--https://publicdomainvectors.org/en/free-clipart/Purple-racing-car-vector-graphics/9689.html
--https://publicdomainvectors.org/en/free-clipart/Yellow-racing-car-vector-illustration/9691.html
--https://publicdomainvectors.org/en/free-clipart/Orange-racing-car-vector-image/9687.html
--https://publicdomainvectors.org/en/free-clipart/Black-car-vector-illustration/9676.html
--https://publicdomainvectors.org/en/free-clipart/Pink-car-top-view-vector-illustration/9657.html
--https://publicdomainvectors.org/en/free-clipart/Car-top-view/40462.html
--https://publicdomainvectors.org/en/free-clipart/Medical-van-top-view-vector-illustration/27093.html
--https://publicdomainvectors.org/en/free-clipart/Fire-emergency-truck-top-view-vector-image/27092.html
--https://publicdomainvectors.org/en/free-clipart/Vector-clip-art-of-top-view-of-man-on-motorbike/27380.html
+- https://publicdomainvectors.org/en/free-clipart/Top-view-car-vector/2260.html
+- https://publicdomainvectors.org/en/free-clipart/Vector-image-of-a-car/3123.html
+- https://publicdomainvectors.org/en/free-clipart/Turquoise-racing-car-vector-drawing/9690.html
+- https://publicdomainvectors.org/en/free-clipart/Purple-racing-car-vector-graphics/9689.html
+- https://publicdomainvectors.org/en/free-clipart/Yellow-racing-car-vector-illustration/9691.html
+- https://publicdomainvectors.org/en/free-clipart/Orange-racing-car-vector-image/9687.html
+- https://publicdomainvectors.org/en/free-clipart/Black-car-vector-illustration/9676.html
+- https://publicdomainvectors.org/en/free-clipart/Pink-car-top-view-vector-illustration/9657.html
+- https://publicdomainvectors.org/en/free-clipart/Car-top-view/40462.html
+- https://publicdomainvectors.org/en/free-clipart/Medical-van-top-view-vector-illustration/27093.html
+- https://publicdomainvectors.org/en/free-clipart/Fire-emergency-truck-top-view-vector-image/27092.html
+- https://publicdomainvectors.org/en/free-clipart/Vector-clip-art-of-top-view-of-man-on-motorbike/27380.html
 
 Items:
 BOOST: https://publicdomainvectors.org/en/free-clipart/Vector-illustration-of-fuel-canister/17859.html
