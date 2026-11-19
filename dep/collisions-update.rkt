@@ -10,6 +10,9 @@
     [x1 (pos-x pos1)] [y1 (pos-y pos1)]
     [x2 (pos-x pos2)] [y2 (pos-y pos2)])
     (and (<= (abs (- x1 x2)) range-x) (<= (abs (- y1 y2)) range-y))))
+
+(define (speed game delta)
+  (* delta (pos-y (gs-velocity game)) 0.7))
             
 ;This function checks whether game-state objects like BOOST or EXTRALIFE are too far behind the player so that they can be recycled
 (define (behind? p game)
@@ -24,7 +27,7 @@
         [(and
           (= (car-lane npc) (car-lane (first c))) ; Same Lane
           (>= (pos-y (car-pos npc)) (pos-y (car-pos (first c))))) ; npc lower than (first c)
-          (<= (abs (- (pos-y (car-pos npc)) (pos-y (car-pos (first c))))) 150) ; Close y-positions
+          (<= (abs (- (pos-y (car-pos npc)) (pos-y (car-pos (first c))))) 175) ; Close y-positions
           
           (cons
             (car
@@ -107,7 +110,7 @@
 
                     (set-gs-lives! game (- (gs-lives game) 1))
                     (set-gs-player! game (pos x (+ y (* 10 (if (< vy v-car) -1 1)))))
-                    (crash)
+                    (crash) ; sound effect
 
                     ; Return value: NPC's speed
                     (/ (+ v-total e*v-relative) 2))

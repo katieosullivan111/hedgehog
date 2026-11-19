@@ -34,7 +34,7 @@
 
 (define HEART (scale 0.15 (bitmap "../img/life.png")))
 (define BOOST (bitmap "../img/BOOST.png"))
-(define EXTRALIFE (bitmap "../img/time.png"))
+(define EXTRATIME (bitmap "../img/stopwatch.png"))
 (define NAVIGATION-BAR (rectangle 800 8 'solid 'grey))
 (define BOOST-BAR (rectangle 20 8 'solid 'red))
 (define LIFE-BAR (rectangle 20 8 'solid 'blue))
@@ -73,7 +73,7 @@
           ,(text "DRIVE FAST!" 70 'red)
 
           ,BOOST
-          ,EXTRALIFE
+          ,EXTRATIME
 
           ,@(if (< y AI.HEADSTART) (map (lambda (i) (hash-ref AI.images (car-index i))) (gs-cars game)) empty)
 
@@ -96,10 +96,15 @@
           ,(text (number->string (gs-lives game)) 70 'white) ; Lives
 
           ,(text (string-append (number->string (- (* (gs-km game) 1000) distance)) " m") 32 'blue) ; Metre Countdown
-          ,(text (string-append (number->string (if (<= countdown 10) countdown-raw countdown)) " s") 16 (cond
-                                                                                                                [(>= d 15) 'green]
-                                                                                                                [(>= d 10) 'blue]
-                                                                                                                [else 'red])) ; Countdown
+          ,(text (string-append (number->string (if (<= countdown 10) countdown-raw countdown)) " s")
+            (cond
+              [(>= d 10) 32]
+              [(>= d 5) 40]
+              [else 48])
+            (cond
+              [(>= d 10) 'green]
+              [(>= d 5) 'orange]
+              [else 'red])) ; Countdown
         )
         `(
           ; Road

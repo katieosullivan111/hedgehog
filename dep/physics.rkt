@@ -51,8 +51,10 @@
 
     (when (or (< x bound-l) (> x bound-r))
       (set-gs-lives! game (- (gs-lives game) 1)) ; Reduce lives
+      (crash) ; sound effect
       ; (set-gs-player! game (pos (+ bound-l 20) y))
-      (set-gs-wheel! game (p2m (- vx)))))) ; Rebound
+      (set-gs-wheel! game (p2m (- vx)))))
+      ); Rebound
 
 ; tick
 (define (TICK-physics game delta)

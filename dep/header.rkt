@@ -9,7 +9,7 @@
 
 ; General
 (struct pos (x y)) ; Position Structure
-(struct car (pos speed lane index) #:transparent) ; position and image index
+(struct car (pos speed lane index) #:transparent) ; position velocity lane-no. image index
 (struct gs (t fps deadline km camera player velocity accelerator spin wheel steering lives lane-y BOOST EXTRATIME cars) #:mutable) ; Game State
 ; <number> <number> <number> <number> <pos> <pos> <pos> <int [-1, 1]> <number> <int [-1, 1]> <number> <number> <pos> <pos> <list<car>>
 (struct ts (heading subheading mouse-y exit)) ; Title State
@@ -29,7 +29,6 @@
 (define (accelerate) (play-sound "sounds/acceleration.aiff" #t))
 (define (crash) (play-sound "sounds/carcrash.aiff" #t))
 (define (brake) (play-sound "sounds/braking.aiff" #t))
-(define (bounds) (play-sound "sounds/bounds.aiff" #t))
 (define (startup) (play-sound "sounds/startup.aiff" #t))
 (define (BOOST) (play-sound "sounds/BOOST.aiff" #t))
 (define (EXTRATIME) (play-sound "sounds/EXTRATIME.aiff" #t)) 
@@ -55,5 +54,5 @@
 
 ; Physics & AI
 (define CAR.E 0.7) ; Co-efficient of Restitution between player and other cars
-(define AI.HEADSTART (m2p (- 50))) ; AI doesn't spawn until player has traveled 100m
+(define AI.HEADSTART (m2p (- 50))) ; AI doesn't spawn until player has traveled 50m
 (define AI.count (round (* SCENE.HEIGHT 0.01 (hash-ref config 'traffic-density)))) ; traffic-density = #traffic per 100 pixels
