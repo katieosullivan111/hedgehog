@@ -208,7 +208,7 @@ The score, lives, fps and speed string all appear in the top-left of the screen.
 The three rectangles lining the top of the screen indicate the x co-ordinate of each special-item, showing the player where to move to if they want to obtain it.
 Later iterations could potentially implement a speedometer to display the player's velocity.
 
-## Camera. 
+## Camera
 The camera looks down on the player and road in a 2-D system. The camera is set to follow the player’s movement:
  (set-gs-camera! game (pos 0 (- (pos-y (gs-player game)) SCENE.CAMERAHEIGHT)))
   game

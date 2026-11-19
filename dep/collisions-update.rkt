@@ -15,32 +15,10 @@
 (define (behind? p game)
   (< (pos-y (gs-player game)) (- (pos-y (p game)) 300)))
 
-; Recycle cars that are far behind when the player is faster, or far ahead when slower.
-(define (keep-cars? cars game)
-  (let*-values (
-    [(too-far-behind remaining)
-      (partition
-        (lambda (npc)
-          (and
-            (> (pos-y (gs-velocity game)) (car-speed npc))
-            (> (pos-y (car-pos npc)) (+ (pos-y (gs-player game)) 300))))
-        cars)]
-    [(too-far-ahead nearby)
-      (partition
-        (lambda (npc)
-          (and
-            (< (pos-y (gs-velocity game)) (car-speed npc))
-            (< (pos-y (car-pos npc)) (- (pos-y (gs-player game)) SCENE.HEIGHT))))
-        remaining)])
-    (append
-      (add-gap too-far-behind game -1)
-      nearby
-      (add-gap too-far-ahead game 1))))
-
 ; This function adjusts cars which are too close together, by speeding up cars being overtaken
-(define (checker c game)
+(define (ai-collisions c game)
   (letrec (
-    [checker-aux (lambda (npc c)
+    [aux-func (lambda (npc c)
       (cond
         [(empty? c) empty]
         [(and
@@ -55,35 +33,10 @@
               (car-lane (first c))
               (car-index (first c)))
             (rest c))]
-        [else (cons (first c) (checker-aux npc (rest c)))]))])
+        [else (cons (first c) (aux-func npc (rest c)))]))])
     (if (empty? c)
       empty
-      (cons (first c) (checker (checker-aux (first c) (rest c)) game)))))
-
-;This gives cars which are touching a new pos away from each other
-(define (add-small-gap c game)
-  (if (empty? c)
-    empty
-    (cons
-      (car (pos (pos-x (car-pos (first c))) (- (pos-y (car-pos (first c))) 5)) (+ (car-speed (first c)) 50) (car-lane (first c)) (car-index (first c)))
-      (add-small-gap (rest c) game))))
-
-; Recycles cars out of range
- (define (add-gap x game direction) ; direction -1 for in front, +1 for behind player
-  (local [
-    (define lane (random ROAD.LANES))
-    (define x-offset (+ 35 (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 70))))]
-    (if (empty? x)
-      empty
-      (cons
-        (car
-          (pos
-            (+ (list-ref AI.LANEX lane) x-offset)
-            (+ (pos-y (gs-player game)) (random 500) (* (+ SCENE.HEIGHT (if (< direction 0) (pos-y (gs-velocity game)) 0)) direction)))
-          (hash-ref AI.LANESPEEDS lane)
-          lane
-          (random AI.imagecount))
-        (add-gap (rest x) game direction)))))
+      (cons (first c) (ai-collisions (aux-func (first c) (rest c)) game)))))
 
 ; Returns a random x value within the bounds of the road
 (define (interval) (+ (random ROAD.WIDTH) (first AI.LANEX)))
@@ -105,6 +58,17 @@
       (min
         target
         (- v (* AI.deceleration delta))))]
+    [recycle (lambda (c direction player-y player-v)
+      (local [
+        (define lane (random ROAD.LANES))
+        (define x-offset (+ 35 (random (- (round (/ ROAD.WIDTH ROAD.LANES)) 70))))]
+        (car
+          (pos
+            (+ (list-ref AI.LANEX lane) x-offset)
+            (+ player-y (random 500) (* (+ SCENE.HEIGHT (if (< direction 0) player-v 0)) direction)))
+          (hash-ref AI.LANESPEEDS lane)
+          lane
+          (random AI.imagecount))))]
 
     [update-cars (lambda (cars game delta)
       (if (empty? cars)
@@ -115,31 +79,43 @@
           [x (pos-x r)] [y (pos-y r)])
 
           (cons
-            (car
-              (pos x-car (- y-car (* v-car delta))) ; Updated npc position
-              ; Re-calculate npc speed if collides with player
-              (if (and (<= (abs (- y y-car)) 110) (<= (abs (- x x-car)) 50))
-                (let* ([vx (pos-x v)] [vy (pos-y v)]
-                  [e*v-relative (* CAR.E (- vy v-car))] ; (Co-eff of Restituion)(Relative V)
-                  [v-total (+ vy v-car)]) ; Sum of original car and player v
+            (cond
+              ; Recycle cars that are far behind when the player is faster, or far ahead when slower.
+              [(and
+                (> (pos-y v) v-car)
+                (> y-car (+ y 300))) ; Car too far behind
+                (recycle npc -1 y (pos-y v))]
+              [(and
+                (< (pos-y v) v-car)
+                (< y-car (- y SCENE.HEIGHT))) ; Car too far ahead
+                (recycle npc 1 y (pos-y v))]
+              ; Otherwise update npc normally
+              [else (car
+                (pos x-car (- y-car (* v-car delta))) ; Updated npc position
 
-                  ; Applying Principle of Conservation of Momentum, Newton's Restitution dynamics, vy = 0.5(v-tot - e*v-r), v-car = 0.5(v-tot + e*v-r)
-                  (set-gs-velocity! game (pos vx (/ (- v-total e*v-relative) 2)))
+                ; Check for collision with player
+                (if (and (<= (abs (- y y-car)) 110) (<= (abs (- x x-car)) 50))
+                  (let* ([vx (pos-x v)] [vy (pos-y v)]
+                    [e*v-relative (* CAR.E (- vy v-car))] ; (Co-eff of Restituion)(Relative V)
+                    [v-total (+ vy v-car)]) ; Sum of original car and player v
 
-                  ; Rebound player horizontally
-                  (set-gs-wheel! game (* (- x x-car) 0.5)) ; .5 dampening effect
+                    ; Applying Principle of Conservation of Momentum, Newton's Restitution dynamics, vy = 0.5(v-tot - e*v-r), v-car = 0.5(v-tot + e*v-r)
+                    (set-gs-velocity! game (pos vx (/ (- v-total e*v-relative) 2)))
 
-                  (set-gs-lives! game (- (gs-lives game) 1))
-                  (set-gs-player! game (pos x (+ y (* 10 (if (< vy v-car) -1 1)))))
+                    ; Rebound player horizontally
+                    (set-gs-wheel! game (* (- x x-car) 0.5)) ; .5 dampening effect
 
-                  ; Return value: NPC's speed
-                  (/ (+ v-total e*v-relative) 2))
-                (normalise-v v-car (hash-ref AI.LANESPEEDS (car-lane npc))))
-              (car-lane npc)
-              (car-index npc))
+                    (set-gs-lives! game (- (gs-lives game) 1))
+                    (set-gs-player! game (pos x (+ y (* 10 (if (< vy v-car) -1 1)))))
+
+                    ; Return value: NPC's speed
+                    (/ (+ v-total e*v-relative) 2))
+                  (normalise-v v-car (hash-ref AI.LANESPEEDS (car-lane npc))))
+                (car-lane npc)
+                (car-index npc))])
             (update-cars (rest cars) game delta)))))]
   )
-    (set-gs-cars! game (update-cars (keep-cars? (checker (reverse (gs-cars game)) game) game) game delta))
+    (set-gs-cars! game (update-cars (ai-collisions (reverse (gs-cars game)) game) game delta))
 
     ; Handle Boost and Extra-time items
     (when (touching? (gs-BOOST game) r)
