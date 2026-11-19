@@ -1,8 +1,15 @@
 # User Documentation
 
+- Overview
+- Objective
+- Mechanics - How to Play
+    - Movement
+    - Special Features
+- Adjustability
+
 ## Overview
 <img src="/img/car.png" height="150" align="right" alt="car image"/>
-In this game the user controls a car driving forward on a road, with the primary objective of avoiding collisions and remaining on the road in order to travel in 1 kilometre increments as quickly as they can. Cars and motorbikes on the road coming toward the user must be avoided, and upon a collision, a life is lost. Similarly, if the player travels off the road, a life is lost. Three lives are given to the player at the start of the game, and once the player has no lives left, the game is over.
+In this game the user controls a car driving forward on a road, with the primary objective of avoiding collisions and remaining on the road in order to travel in 1 kilometre increments as quickly as they can. Cars and motorbikes on the road coming toward the user from behind must be avoided, and upon a collision, a life is lost. Similarly, if the player travels off the road, a life is lost. Three lives are given to the player at the start of the game, and once the player has no lives left, the game is over.
 
 
 ## Objective
