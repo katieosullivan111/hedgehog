@@ -1,8 +1,15 @@
 # User Documentation
 
+- Overview
+- Objective
+- Mechanics - How to Play
+    - Movement
+    - Special Features
+- Adjustability
+
 ## Overview
 <img src="/img/car.png" height="150" align="right" alt="car image"/>
-In this game the user controls a car driving forward on a road, with the primary objective of avoiding collisions and remaining on the road in order to travel in 1 kilometre increments as quickly as they can. Cars and motorbikes on the road coming toward the user must be avoided, and upon a collision, a life is lost. Similarly, if the player travels off the road, a life is lost. Three lives are given to the player at the start of the game, and once the player has no lives left, the game is over.
+In this game the user controls a car driving forward on a road, with the primary objective of avoiding collisions and remaining on the road in order to travel in 1 kilometre increments as quickly as they can. Cars and motorbikes on the road coming toward the user from behind must be avoided, and upon a collision, a life is lost. Similarly, if the player travels off the road, a life is lost. Three lives are given to the player at the start of the game, and once the player has no lives left, the game is over.
 
 
 ## Objective
@@ -44,11 +51,17 @@ When the user moves the car left or right, the steering wheel in the bottom left
 
 - <ins><b>Extra Time:</b></ins>
   
-  ![extra life image](/img/life.png)
+  ![extra life image](/img/time.png)
 
   When you collect the extra time element, you get en extra two seconds to travel the 1000 metres.
 <br>
 You can keep an eye out for these elements by looking at the grey navigation bar at the top of the screen. A red bar represents an incoming boost, and a blue bar represents an incoming extra time.
+
+<br> 
+
+## Adjustability
+
+To adjust screen size, frames per second, traffic density and initial lives, the user can go to [config.json file](/config.json), and edit the relevant figure.
 
 
 <br><br><br>
