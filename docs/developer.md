@@ -1,44 +1,44 @@
-#HEDEHOG LICENSE
+# HEDEHOG LICENSE
 
-##Contents
--Concept Statement
--Genre
--Target Audience
--Scope
--Language and Device
+## Contents
+- Concept Statement
+- Genre
+- Target Audience
+- Scope
+- Language and Device
 - Modules
--Game Termination
--Score
--ITEMS
--Lives
--AI
--Difficulty
+- Game Termination
+- Score
+- ITEMS
+- Lives
+- AI
+- Difficulty
 - Structs
--Collisions
--Controls
--UI and HUD
--Camera
--Physics
--Steering
--Road
--Animation
--Tick
--Big-Bang
--Sound
--json
+- Collisions
+- Controls
+- UI and HUD
+- Camera
+- Physics
+- Steering
+- Road
+- Animation
+- Tick
+- Big-Bang
+- Sound
+- json
 - Miscellaneous
--References
+- References
 
-##Concept Statement
+## Concept Statement
 This is an explosive 2-D vertical scroller which sees the player avoid other vehicles while weaving through traffic to try and get as high a score as possible. The player must ensure the clock does not reach 0 or the game will end. Power-ups can be obtained along the way which make each run unique and unpredictable. The game incorporates realistic steering and increasing difficulty as the player's score increases.
 
-##Genre
+## Genre
 This game is a single-player, retro, 2-D scroller, with fast-paced racing.
 
-##Target Audience
+## Target Audience
 This game can be enjoyed by players of any age, it avoids violence or brutality which makes it suitable for younger audiences, but its retro style and simplistic control-system can also appeal to an older generation not looking to play a game which requires major time commitments.
 
-##Scope
+## Scope
 This game a timed scroller if the which sees the player develop enough skill with the mechanics to beat the clock.
 The game contains a number of AI which can be easily adjusted by players or developers, and their collisions with player's are modelled with real world physics.
 The road and lane systems form the template for how the AI move, and the lane numbers, scene height, and scene width are also easily adjusted. There is only one map for player's to use.
@@ -49,11 +49,11 @@ There are two power-ups, BOOST and EXTRATIME, which affect the player's velocity
 A minor sound system is implemented but was used as a late experiment to show what features could be developed in the game should someone wish to create further iterations.
 The game was made with a close deadline in mind so multiplayer and multi-level design were never seen as realistic targets, although they would be relatively easy to implement by following the foundations our code lays out.
 
-##Language and Device
+## Language and Device
 The game is written on ‘Racket’ in Racket’s native language (accessed by #lang racket) and can be used on PC, laptops or tablets with an additional keyboard accessory, through racket software. 
 Porting to other devices would not be too difficult, and should any future developers wish to do so they should mainly reference the ‘keydown’ and ‘key-up’ functions as well as adjust the display format (see section 'json' of this document).
 
-##Modules
+## Modules
 There are 6 modules in total stored within the project's folder. The game is run from `main.rkt`. The other five files can be found in the `dep` folder. Developers should use the following key to decide which folder to reference when making changes:
 -`main.rkt`: runs the game, holds the initial game-state, holds the controls for movement, contains the ``tick` and `big-bang` functions, as well as any code for the title and death sequence.
 -`AI.rkt`: creates the list of AI positions as well as the list of their image indexes. Holds the lane positions which AIs are places at. The AI's images can be changed here.
@@ -62,7 +62,7 @@ There are 6 modules in total stored within the project's folder. The game is run
 -`collisions.rkt`: Any functions which define how objects interact with each other by touching are found here (including any items), as well as the functions which recycle and update the positions of the AI. 
 -`header.rkt`: All structs are defined in this file as well as any definitions which are required in multiple files without creating circular dependencies. Any definitions imported from `json` are also stored here (more details on `json` further down`). Some short sound-files are also used in functions within this module.
 
-##Game Termination
+## Game Termination
 (See lines 44-66 and lines 96-99 in 'main.rkt`).
 The game can end in three ways: 
 -The player clicks the red stop button in the game pop-up window, prompting racket to stop running the programme.
@@ -72,10 +72,10 @@ There are two functions which prompt termination: `tick` and `exit?`.
 `tick` checks if the player runs out of lives or the countdown (referred to as `deadline` in the programme), reaches 0. When this function is called is called the player moves to up and to the right and is set to rotate depending on the `spin` value stored in the gs.
 It will also prompt the fail screen to appear, (further discussed in UI and HUD). The  countdown is reset to the moment of termination. If the lives or countdown are greater than zero, the game will begin by starting to update all of its relevant gameplay functions in `tick`.
 
-##Score
+## Score
 The player’s score is shown in the top left. It is directly proportional to the vertical distance travelled by the player in metres and can only be increased by moving further. It can be decreased when the player hits a car from behind with a velocity less than that car's, causing it to move backwards, thus decreasing the score.
 
-##ITEMS
+## ITEMS
 There are two items which the player can obtain: BOOST and EXTRATIME.
 
 The BOOST icon is denoted by a fuel can.
@@ -90,12 +90,12 @@ Both items spawn at random positions on initialisation, determined by `interval`
 When the player moves past the items their position is adjusted proportional to the player’s velocity (see `behind?`, lines 15-16, and `spawn-distance`, lines 51-56 in `collisions-update.rkt`).
 When the player touches the items, they will respawn a random distance away from the player. BOOST will spawn at least 2000 units away and at most 3000 (+ (random 1000) 2000), while EXTRATIME spawns between 10000 and 15000 units away, as it is objectively much more valuable to the player.
 
-##Lives
+## Lives
 The player starts the game with three lives. Lives can only be lost, never gained.
 Lives can be lost in two ways. The first is when the player hits the outermost yellow line on either side of the screen, i.e tries to go out of bounds.
 The second way is when the player collides with an NPC. These events will further be discussed in the collisions section of this document.
 
-##AI
+## AI
 The AI are initially assigned 1 random lane position. The `make-car-pos' function (see lines 29-41 in `AI.rkt`) assigns each position an x co-ordinate for the centre of a random lane, by choosing a random number from 0 to `ROAD.LANES -1`. For example, if 0 is the random number selected on the first call, the first car is placed in row 1, if it is 3 the car is placed in the fourth row etc. A list is created using accumulative recursion until the number of elements reaches the number of desired AI. Again the distances for where the cars are placed are defined in `header.rkt` so a developer will not have to worry about updating any of the AI placing functions.
 
 
@@ -105,7 +105,7 @@ The AI are initially assigned 1 random lane position. The `make-car-pos' functio
 `x-offset' places the cars at a random x co-ordinate in the lane interval (a bit less than plus or minus the width of each lane from the centre). This ensures players can not simply drive between lanes to avoid cars because the AI moving in a straight line.
 
 
-###Image Indexing
+### Image Indexing
 
 The AI's images can be found in the `npc` subfolder in the project's images folder. They are labelled as n.png where n is a number from 1-12.
 
@@ -121,7 +121,7 @@ Previous images don’t need to be tracked and don't have to be unique in the li
 
 The cars are passed to `draw`. If the player has traveled over 50m (see `AI.HEADSTART` line 58 in `header.rkt`), `map (lambda (car))` is used to extract the positions relative to the camera, and `(map (lambda (i) (hash-ref AI.images (car-index i))) (gs-cars game)) empty)` to extract the list of images (see lines 78 and 112-117 of `animation.rkt`).
 
-###AI Movement and Interactions
+### AI Movement and Interactions
 
 The cars argument of the game state stores all of the car positions, speeds  their image index and the lane they are assigned to once they are generated.
 
@@ -135,7 +135,7 @@ If a car is neither too far ahead nor behind, its position is updated based on i
 ‘Update-cars’ is recursively called for all NPC cars, finally updating all the cars’ speeds and is ran within ‘collisions-update’ in ticking function starting as soon as the player has traveled over 100m.
 
 
-###Image Indexing
+### Image Indexing
 The AI's images can be found in the `npc` subfolder in the project's images folder. They are labelled as n.png where n is a number from 1-12.
 A hash table is made as `AI.images` and each image is stored as an index.
 This means that calling index 4 will give `3.png'. `for/list` then creates the list where each element is the corresponding index in the hash-table, (see `AI.images` line 10 in `AI.rkt`). `string-append` is also used so that Racket can reference the image through `bitmap/file`, by appending whatever number is being called between "img/npc/" and ".png".
@@ -151,14 +151,14 @@ The cars are passed to `draw` using
 
 `AI.cars` stores a list of the car-structs and is used in init to set `gs-cars` to that list of all AI cars so that it can be mutated in other functions.
 
-##Difficulty
+## Difficulty
 The game's difficulty depends on the countdown time given to a player. This can be changed in `init` in `main.rkt`.
 
 The countdown  adds a high level of difficulty to the game. `timeout` (see lines 61-66 in `main.rkt` is used to determines what value the time should be at any given moment (it is updated every time `tick` is called). When the player travels a km in the game the countdown is reset. The `deadline` (what the countdown is defined as in-game) has the remaining time from the last kilometre added on to its reset value, and the game-state which stores `km` adds 1 onto the stored value, so that the next milestone is checked against the next km. For example, if the player passes 5km, the stored value adds 1 so the next km checked for is 6km.
 
 The AI's speed also grows with the player's velocity (see `speed` line 25-26 of `AI.rkt`). This is built into the `car` struct, so their speed
 
-##Structs 
+## Structs 
 (See lines 9-15 `header.rkt`).
 The game uses four structs:
 -pos
@@ -187,12 +187,13 @@ The gs (game-state) struct is a mutable structure which holds:
 The `ts` function refers to the title state. It holds a heading, subheading, mouse-y and exit. `STATE.TITLESCREEN` is defined in `main` and is passed to `big-bang`. The heading simply refers to the text of the game's name upon initialisation. The subheading tells players to press `space` in order to initialise the game. `mouse-y` is initially set to 0, but the `mouse-event` function (which is only called in ts not gs) allows for the headings to appear again after the player has died. The road is also set to follow the mouse when the game is in ts, so that the player can scroll up the road between playthroughs. This state is used only between actual playthroughs.
 
 
-##Collisions
+## Collisions
 There are multiple types collisions which can occur in this game. The first is between the player and either of the outermost two lanes. In this event the direction of their steering will be adjusted to point in the opposite direction of their horizontal velocity, it rebounds off the edge. (see `check-player-bounds` lines 46-56 of `physics.rkt`). The bounds are calculated using the road dimensions from 'header.rkt'.
 
 To update the AI's stored values for a given event recursive functions should be used. Simply create a recursive function which takes the list of all cars `gs-cars`, states the base case and the condition to be checked. If the condition is true, cons a car with the new desired values onto that recursive function applied to the rest of the list.
 For example: 
-```(define (add-gap x game)
+```
+(define (add-gap x game)
   (if (empty? x)
       empty
       (cons
@@ -202,7 +203,8 @@ For example:
           (- (pos-y (car-pos (first x))) 20)
            (car-lane (first x))
              (car-index (first x))
-        (add-gap (rest x) game))))```,
+        (add-gap (rest x) game))))
+```
 is a function which changes a cars vertical position by 20 units. (this function is no longer used in game but serves as an intuitive example). It retains the image, speed and lane of the car. By following this structure to create new functions for the AI. developers can easily change their values for any given circumstance.
 
 If there is a collision between the player and an AI (see lines 97-119 in `collisions-update.rkt`), the coefficient of restitution for that collision is calculated by multiplying `CAR.E` (the general coefficient of restitution between player and cars), by the sum of the two vehicle's velocities in the vertical direction. `v-total` calculates the sum of the vehicle's velocities so that the Principle of Conservation of Momentum [PCM] can be used to calculate the AI's velocity after the collision. The same is also applied to their velocities in the horizontal direction:
@@ -215,7 +217,7 @@ If no collision is detected in the `update-cars` function, its vertical velocity
 
 The `ai-collisions` function checks for collisions between AI, to ensure that their positions will never overlap. It selects a car from the list it is provided and first checks if the cars are in the same lane, then if the selected car is below the other car it collides with. If the distance between the cars vertically is equal to or less than 150, all the conditions are met to assume the cars are colliding or are too close together. The other car's position is replaced in the list by returning a car with a greater speed so that it avoids the collision with the selected car nay speeding up. If the conditions are not met, the other car's values are returned as an element of the list.
 
-The cars are also checked within the local function to see if they are eligible for recycling. If they are 300 units behind the player (vertically) `recycle -1' is called on them, or `recycle 1` if their vertical positions exceed the `SCENE.HEIGHT`. The function is only called when the car's velocity is greater than the AIs, as otherwise the AI will catch up by itself. This function takes a car, and like the `make-car-pos` function (reference the AI section of this document for more) assign the car a new x co-ordinate which is a random position within a lane's width, and a y co-ordinate which places them behind or ahead of the player, depending on whether 1 or -1 is passed to `recycle` as an argument:
+The cars are also checked within the local function to see if they are eligible for recycling. If they are 300 units behind the player (vertically) 'recycle -1' is called on them, or `recycle 1` if their vertical positions exceed the `SCENE.HEIGHT`. The function is only called when the car's velocity is greater than the AIs, as otherwise the AI will catch up by itself. This function takes a car, and like the `make-car-pos` function (reference the AI section of this document for more) assign the car a new x co-ordinate which is a random position within a lane's width, and a y co-ordinate which places them behind or ahead of the player, depending on whether 1 or -1 is passed to `recycle` as an argument:
 ` (+ player-y (random 500) (* (+ SCENE.HEIGHT (if (< direction 0) player-v 0)) direction)))'. They are also given a speed, lane and image.
 
 In `update-cars', `gs-cars` is set to a list which applies `update-cars` (collison with player occurrence or not) to a list which checks if cars are colliding with each other through 'ai-collisions'. If a developer wishes to add another function to alter the cars behaviour they should take time to consider if that function can pass naturally into this composite function;
@@ -223,7 +225,7 @@ In `update-cars', `gs-cars` is set to a list which applies `update-cars` (collis
 
 
 
-##Controls
+## Controls
 (See lines 69-89 in `main.rkt`).
 There are six controls:
 -w
@@ -244,7 +246,7 @@ The steering mechanics are further discussed later on in this document.
 
 Space and esc only register inputs when the game is in ts. The player can press the space bar to start the game (as you have probably seen in the loading screen) and the esc button to exit the game. `exit` Is used to this. It simply checks if the game is in ts and prompts `stop-when` in `big-bang` if it is.
 
-##UI and HUD
+## UI and HUD
 The game contains a minimalistic UI so as to avoid distraction or inconvenience to the player.
 
 As previously mentioned, upon starting the game the player is shown a title screen, there is also a termination screen for when the player loses all of their lives or the countdown reaches 0, (see `timeout` and `tick` lines 44-66 in `main.rkt`).
@@ -261,7 +263,7 @@ The score, fps, speed and distance until the next EXTRATIME all appear in the to
 The three rectangles lining the top of the screen indicate the x co-ordinate of each special-item, showing the player where to move to if they want to obtain it.
 Later iterations could potentially implement a speedometer to display the player's velocity.
 
-##Camera. 
+## Camera. 
 The camera looks down on the player and road in a 2-D system. The camera is set to follow the player’s movement by subtracting the height which the camera covers from the player's vertical displacement from the starting point (see lines 62-63 in `physics.rkt`).
  
 All items (unless intended to stay on the screen at all times such as the score count or UI) must be placed in ‘draw’ relative to the camera, for example BOOST is placed with:
@@ -272,7 +274,7 @@ All items (unless intended to stay on the screen at all times such as the score 
 
 (pos (- (pos-x (gs-BOOST game)) xcam) (- (pos-y (gs-BOOST game)) ycam)).
 
-##Physics
+## Physics
 The programme uses researched physical values to accurately describe the motion of the car on the road. The code accounts for any major forces which would have an effect on its motion such as car mass, torque, drive-ratio etc. (see lines 6-20 in `physics.rkt` for full details. Important definitions include `CAR.MAXSPEED`, `CAR.BRAKEPOWER`, , `rolling-resistance` and `traction`.
 
 
@@ -286,7 +288,7 @@ If the velocity is <= 0, the negative product of the velocity and the car's mass
 `newspeed` (see lines 51-59 in `physics.rkt`) is used to calculate a more accurate value of the car's velocity in the vertical plane when `netforce` has been accounted for.
 By dividing `net force` by the car's mass we obtain the car's acceleration (by Newton's 2nd Law) and by multiplying by delta 9the time between frames) we get the change in acceleration, i.e the velocity. This is added on to the velocity the car gains from the player's input and allows for velocity to be subtracted when controls are released or idle, as newsfeed will be subtracted from the input velocity.
 
-#Steering
+# Steering
 (See lines 27-43 in `physics.rkt`).
 The steering controls the player’s movement in the x direction.
 It is calculated with degrees and is programmed to model a realistic steering system.
@@ -302,7 +304,7 @@ As previously mentioned in controls, pressing ‘a’ or ‘d’ will change the
 
 In draw, the wheel icon is set to rotate by the value stored in the gs multiplied by -9. Since `steer-max` is defined as 30 this means it can turn 270 degrees in either given direction from its starting point before locking.
 
-##Road
+## Road
 (See lines 40-54 of `header.rkt` for rod dimension definitions)
 (See lines 10-45 of `animation.rkt` for object definitions).
 
@@ -316,7 +318,7 @@ In draw, the wheel icon is set to rotate by the value stored in the gs multiplie
 
 `TICK-animation` is passed to tick so that the list of road object positions is updated constantly. It sets the `lane-y` argument of the function to update accordingly to the player's movement. It changes relative to the remainder of 
 
-##Animation
+## Animation
 (See lines 58-148 in `animation.rkt`).
 All objects are placed by `draw` which is used in `big-bang`.
 ‘draw-scene’ allows developers to pass two lists to ‘draw’, the first containing all images and the second with their corresponding positions.
@@ -333,7 +335,7 @@ To use quasiquotation, @ a list and place a comment before each item, like so:
     posns))
 See the camera section of this document for more information on placing items in `draw` relative to the camera.
 
-##Tick
+## Tick
 (See lines 32-59 in `main.rkt`).
 The functions passed to tick are the following:
 -`TICK-physcs`
@@ -349,7 +351,7 @@ See the `game termination` section of this document for more information on how 
 
 In `big-bang`, `tick` aims to run once every frame `[on-tick tick (/ 1 MAXFPS)]`.
 
-##Big-Bang
+## Big-Bang
 (See line 68 of `main.rkt`).
 This creates the universe and tells the programme what functions to run for any given moment on event.
 Passing `tick` to `on-tick` tells the game to update that function every tick divided by the MAX.FPS, so the world is updated every frame as opposed to every tick.
@@ -357,12 +359,12 @@ Passing `draw` to `to-draw` tells the game what function to use when drawing the
 `on-key` and `on-release` tell the game to use `keydown` or `keyup` respectively.
 Passing `exit?` to `stop-when` tells the universe when to terminate.
 
-#Sound
+## Sound
 There are a small number of sound files saved to the game (see lines 28-32 in `header.rkt`) and play when an event such as a collision or change in the player's acceleration occur. The audio system is not currently fleshed out as it was added as an extra feature close to this project's deadline but if a developer wanted to improve this system we recommend they download the `RSOUND` module as this is what we would use to improve this mechanic with additional time. It would allow for looping of sound files, potentially for a traffic sound or music to play at all times.
 
 In the current version of the game, `play-sound` is used to extract the sound files from the project folder.
 
-#json
+## JSON
 The json file is used to allow players and developers to change important repeated numerical values with ease. 
 Values which can be changed in `json`:
 -max-fps
@@ -373,7 +375,7 @@ If a developer were to decide to add another important repeated value, they shou
 (define SCENE.WIDTH (max(hash-ref (hash-ref config 'resolution) 'width) (+ ROAD.WIDTH 80))).
 `configure` is defined in `header.rkt` to allow developers to reference the file.
 
-##Miscellaneous Definitions
+## Miscellaneous Definitions
 -`list-increment` (see lines 29-35 in `header.rkt`):
 This function is used to increase one element of a list per call of a function. It adds 1 to the element it lands on when i=0 and reconstructs the list with all elements unchanged except that one. If i doesn't equal 0, it calls on a shorter list with its index reduced by 1, so that in the next few passes it will reach 0 and perform the operation. This function is used to track which lanes the AI are placed in.
 -`MAXFPS` (see line 38 in `header.rkt`):
@@ -384,7 +386,7 @@ This definition is used regarding car placement and ensures the cars don't spawn
 This determines the size of the list of AI cars. It can be changed in `json` to increase or decrease difficulty depending on preferences.
 
 
-##References 
+## References 
 
 Images:
 
